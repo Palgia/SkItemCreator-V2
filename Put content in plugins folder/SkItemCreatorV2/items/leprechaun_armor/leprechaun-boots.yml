@@ -1,0 +1,22 @@
+item:
+  type: VANILLA
+  value: LEATHER_BOOTS
+
+name: "&a&lLeprechaun boots"
+
+lore:
+  - ""
+  - "&fThis item is part of"
+  - "&fthe &aLeprechaun set&f!"
+
+color: 
+  decimal: 7912051
+  show-in-tooltip: false
+
+attributes:
+  1:
+    name: "minecraft:scale"
+    operation: add_value
+    amount: -0.2
+    slot: feet
+    show-in-tooltip: true

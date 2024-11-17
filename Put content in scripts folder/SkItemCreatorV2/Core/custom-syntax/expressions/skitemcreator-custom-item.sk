@@ -1,0 +1,5 @@
+#
+#Returns a custom item from SkItemCreator
+expression [skitemcreator[ ]]custom item %string%:
+    get:
+        return SKICGetItemFromID(expr-1)

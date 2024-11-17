@@ -1,0 +1,10 @@
+item:
+  type: VANILLA
+  value: DIAMOND_ORE
+
+name: "<#54C0FF>&lF<#52BFF6>&la<#51BEEC>&lk<#4FBDE3>&le <#4CBBD0>&lD<#4ABAC7>&li<#49B9BD>&la<#47B8B4>&lm<#47B8B4>&lo<#47B8B4>&ln<#47B8B4>&ld <#47B8B4>&lO<#47B8B4>&lr<#47B8B4>&le"
+
+lore:
+  - "&fBreak it, you'll see!"
+
+save-nbt: true

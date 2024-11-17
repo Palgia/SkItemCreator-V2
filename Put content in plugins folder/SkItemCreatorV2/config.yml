@@ -1,0 +1,20 @@
+#
+#Create custom rarities for your items!
+#You can create an infinite amount of them.
+#Place your rarity in your lore with {placeholder:rarity:<rarity>}
+#
+rarities:
+  common:
+    display: "&a&lCOMMON"
+  rare:
+    display: "&b&lRARE"
+  legendary:
+    display: "&6&lLEGENDARY"
+  mythic:
+    display: "&d&lMYTHIC"
+  special:
+    display: "&c&lSPECIAL"
+  unique:
+    display: "<#A51443>&lUNIQUE"
+  admin:
+    display: "&c&lADMIN"

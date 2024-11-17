@@ -1,0 +1,84 @@
+
+#
+#MISC OPTIONS
+#
+options:
+    #Plugin prefix
+    plugin-prefix: <##084CFB>[&lS<##2B47ED>&lk<##4F41DF>&lI<##723CD1>&lt<##9537C3>&le<##B832B5>&lm<##DC2CA7>&lC<##FF2799>&lr<##FA2A96>&le<##F42D92>&la<##EF308F>&lt<##E9348C>&lo<##E43789>&lr<##DE3A85>&lV<##D93D82>&l2]
+
+
+import:
+    org.bukkit.Material
+    org.bukkit.inventory.ItemStack
+
+#
+#Load crafts
+#
+function SKICLoadCrafts():
+
+    #Unload everything just to be sure
+    loop all of the currently loaded yaml files:
+        unload yaml loop-value-1
+
+    delete {skitemcreator.crafts::*}
+    load yaml "plugins/SkItemCreatorV2/crafts.yml" as "crafts"
+    #Items
+    loop yaml node keys "crafts" from "crafts":
+        if loop-node is set:
+            set {_node::*} to "%loop-node%" split at "."
+            if {_node::2} is set:
+                set {_result} to {_node::2}
+                if {skitemcreator.items.database::*} contains {_result}:
+                    loop yaml node keys "crafts.%{_result}%.items" from "crafts":
+                        set {_node::*} to "%loop-node-2%" split at "."
+                        {_node::4} is set
+                        {_craft-material::%{_node::4}%} is not set
+                        add {_node::4} to {_craft-material::*}
+                        #Check if item is vanilla 
+                        set {_item-material} to Material.getMaterial((yaml value "crafts.%{_result}%.items.%{_node::4}%" from "crafts"))
+                        #Item is vanilla
+                        if {_item-material} is set:
+                            set {_craft-material::%{_node::4}%} to new ItemStack({_item-material})
+                        #Else
+                        else:
+                            set {_item} to yaml value "crafts.%{_result}%.items.%{_node::4}%" from "crafts"
+                            set {_craft-material::%{_node::4}%} to {skitemcreator.items.database::%unformatted {_item}%::final-item}
+
+                    #If items from craft are registered:
+                    if {_craft-material::*} is set:
+                        set {_top-line::*} to yaml value "crafts.%{_result}%.layout.top-line" from "crafts" split by ", "
+                        set {_mid-line::*} to yaml value "crafts.%{_result}%.layout.mid-line" from "crafts" split by ", "
+                        set {_bot-line::*} to yaml value "crafts.%{_result}%.layout.bot-line" from "crafts" split by ", "
+                        #Set items:
+                        delete {_craft::*}
+                        loop {_top-line::*}:
+                            add {_craft-material::%loop-value-2%} to {_craft::*}
+                        loop {_mid-line::*}:
+                            add {_craft-material::%loop-value-2%} to {_craft::*}
+                        loop {_bot-line::*}:
+                            add {_craft-material::%loop-value-2%} to {_craft::*}
+                        #Add result to database
+                        add {_result} to {skitemcreator.crafts::*}
+                        add {_craft::*} to {skitemcreator.crafts::%{_result}%::craft::*}
+                        #Permission
+                        set {_permission} to yaml value "crafts.%{_result}%.permission" from "crafts"
+                        if {_permission} is set:
+                            set {skitemcreator.crafts::%{_result}%::permission} to {_permission}
+                        register new shaped recipe for {skitemcreator.items.database::%unformatted {_result}%::final-item} using {_craft::*} with id {_result}
+
+    send "{@plugin-prefix} &e%size of {skitemcreator.crafts::*}% &fcrafts loaded!" to console
+
+#Check for permissions
+on craft:
+    if SKICInternalNameOfItem(item) is set:
+        set {_id} to SKICInternalNameOfItem(item)
+        if {skitemcreator.crafts::%{_id}%::permission} is set:
+            if player doesn't have permission {skitemcreator.crafts::%{_id}%::permission}:
+                cancel event
+
+on preparing craft:
+    if SKICInternalNameOfItem(event-item) is set:
+        set {_id} to SKICInternalNameOfItem(event-item)
+        if {skitemcreator.crafts::%{_id}%::permission} is set:
+            if player doesn't have permission {skitemcreator.crafts::%{_id}%::permission}:
+                set slot 0 of player's current inventory to air

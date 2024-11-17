@@ -1,0 +1,6 @@
+#When an armor set is unequipped.
+#STRING = armor set name
+#PLAYER = event-player
+event "skitemcreator-armor-set-unequip":
+    event-values: string, player
+    pattern: [skitemcreator[ ]]armor[ ]set unequip

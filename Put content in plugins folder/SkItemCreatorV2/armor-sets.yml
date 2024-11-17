@@ -1,0 +1,18 @@
+armor-sets:
+  leprechaun:
+    items:
+      helmet: leprechaun-helmet
+      chestplate: leprechaun-chestplate
+      leggings: leprechaun-leggings
+      boots: leprechaun-boots
+    equip-message: "&a&lLeprechaun armor &eis now active!"
+    equip-sound:
+      value: entity.villager.trade
+      pitch: 2
+      volume: 1
+    skript:
+      on-equip:
+        - "apply infinite speed to player"
+      on-unequip:
+        - "remove speed from player"
+      

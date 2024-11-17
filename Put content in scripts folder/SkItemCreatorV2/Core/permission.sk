@@ -1,0 +1,10 @@
+on left click:
+    SKICGetPermission(tool of player) is set
+    if player doesn't have permission SKICGetPermission(tool of player):
+        cancel event
+
+on right click:
+    SKICGetPermission(tool of player) is set
+    if player doesn't have permission SKICGetPermission(tool of player):
+        cancel event
+

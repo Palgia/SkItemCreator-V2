@@ -1,0 +1,63 @@
+#DROP
+on drop:
+    SKICInternalNameOfItem(event-item) is set
+    set {_id} to SKICInternalNameOfItem(event-item)
+    SKICGetAllDisabledBehaviors(event-item) contains "DROP"
+    cancel event
+
+#DAMAGE
+on damage:
+    SKICInternalNameOfItem(tool of attacker) is set
+    set {_id} to SKICInternalNameOfItem(tool of attacker)
+    SKICGetAllDisabledBehaviors(tool of attacker) contains "DAMAGE"
+    cancel event
+
+#DROP_ON_DEATH
+on death of player:
+    loop drops:
+        SKICInternalNameOfItem(loop-value) is set
+        SKICGetAllDisabledBehaviors(loop-value) contains "DROP_ON_DEATH"
+        remove loop-value from drops
+        event.getItemsToKeep().add(loop-value)
+
+#SHOOT
+on shoot:
+    SKICInternalNameOfItem(tool of shooter) is set
+    set {_id} to SKICInternalNameOfItem(tool of shooter)
+    SKICGetAllDisabledBehaviors(tool of shooter) contains "SHOOT"
+    cancel event
+
+#LEFT CLICK
+on left click:
+    SKICInternalNameOfItem(tool of player) is set
+    set {_id} to SKICInternalNameOfItem(tool of player)
+    SKICGetAllDisabledBehaviors(tool of player) contains "LEFT_CLICK"
+    cancel event
+
+#RIGHT CLICK
+on right click:
+    SKICInternalNameOfItem(tool of player) is set
+    set {_id} to SKICInternalNameOfItem(tool of player)
+    SKICGetAllDisabledBehaviors(tool of player) contains "RIGHT_CLICK"
+    cancel event
+
+#PICKUP
+on player pickup:
+    SKICInternalNameOfItem(event-item) is set
+    set {_id} to SKICInternalNameOfItem(event-item)
+    SKICGetAllDisabledBehaviors(event-item) contains "PICKUP"
+    cancel event
+
+#MOB_PICKUP
+on entity pickup:
+    SKICInternalNameOfItem(event-item) is set
+    set {_id} to SKICInternalNameOfItem(event-item)
+    SKICGetAllDisabledBehaviors(event-item) contains "MOB_PICKUP"
+    cancel event
+
+#CONSUME
+on consume:
+    SKICInternalNameOfItem(event-item) is set
+    set {_id} to SKICInternalNameOfItem(event-item)
+    SKICGetAllDisabledBehaviors(event-item) contains "CONSUME"
+    cancel event

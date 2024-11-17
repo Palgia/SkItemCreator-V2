@@ -1,0 +1,31 @@
+item:
+  type: VANILLA
+  value: WHITE_STAINED_GLASS
+
+name: "<#FFFFFF>&lA<#F5F5F5>&ls<#EAEAEA>&lt<#E0E0E0>&lr<#D5D5D5>&lo<#CBCBCB>&ln<#C0C0C0>&la<#B6B6B6>&lu<#ABABAB>&lt <#B3B3B3>&lH<#B7B7B7>&le<#BCBCBC>&ll<#C0C0C0>&lm<#C4C4C4>&le<#C8C8C8>&lt"
+
+lore:
+  - "&fYou can wear it!"
+  - "&7&oTry it :)"
+
+attributes:
+  1:
+    name: "minecraft:armor"
+    operation: add_value
+    amount: 2
+    slot: head
+    show-in-tooltip: true
+  2:
+    name: "minecraft:jump_strength"
+    operation: add_value
+    amount: 0.5
+    slot: head
+    show-in-tooltip: true
+
+equippable:
+  slot: head
+  equip-sound: block.glass.place
+  dispensable: true
+  swappable: true
+  damage-on-hurt: true
+  camera-overlay: "minecraft:block/white_stained_glass"

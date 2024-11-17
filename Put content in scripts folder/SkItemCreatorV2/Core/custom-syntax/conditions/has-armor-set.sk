@@ -1,0 +1,8 @@
+
+#Check if a player has an armor set equipped
+condition %player% has armor set %string%:
+    check:
+        if metadata tag "SKIC-CURRENT-ARMOR-SET" of expr-1 is expr-2:
+            continue
+        else:
+            exit

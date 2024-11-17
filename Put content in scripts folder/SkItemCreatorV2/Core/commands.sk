@@ -1,0 +1,89 @@
+#
+#MISC OPTIONS
+#
+options:
+    #Plugin prefix
+    plugin-prefix: <##084CFB>[&lS<##2B47ED>&lk<##4F41DF>&lI<##723CD1>&lt<##9537C3>&le<##B832B5>&lm<##DC2CA7>&lC<##FF2799>&lr<##FA2A96>&le<##F42D92>&la<##EF308F>&lt<##E9348C>&lo<##E43789>&lr<##DE3A85>&lV<##D93D82>&l2]
+
+
+command /skitemcreator [<string="gui">] [<string="ALL">] [<string>]:
+    permission: skitemcreator.admin
+    usage: &d/skitemcreator help
+    aliases: skic, ski
+    trigger:
+        if arg 1 is "reload":
+            if arg 2 is set:
+                set {_reload} to arg 2
+            else:
+                set {_reload} to "ALL"
+            SKICLoadConfig({_reload})
+            if {_reload} is "ALL":
+                send "{@plugin-prefix} &eAll items reloaded successfully."
+            else:
+                send "{@plugin-prefix} &b%{_reload}% &eitem reloaded successfully."
+        else if arg 1 is "get":
+            if arg 2 is set:
+                if SKICGetItemFromID(arg 2) is set:
+                    send "{@plugin-prefix} &b%arg 2% &egiven successfully!"    
+                    give SKICGetItemFromID(arg 2) to player
+                else:
+                    send "{@plugin-prefix} &e%arg 2% &cdoes not exist."                    
+            else:
+                send "{@plugin-prefix} &cSecond argument is missing."
+        else if arg 1 is "import":
+            if arg 2 is not set:
+                send "{@plugin-prefix} &cPlease provide an ID for the second argument."
+                stop
+            else:
+                if tool of player is air:
+                    send "{@plugin-prefix} &cYou can't import air!"
+                else:
+                    if {skitemcreator.imported-items.database::*} contains arg 2:
+                        send "{@plugin-prefix} &b%arg 2% &eas been updated successfully!"
+                        SKICImportItem(tool of player, arg 2)
+                    else:
+                        SKICImportItem(tool of player, arg 2)
+                        send "{@plugin-prefix} &b%arg 2% &eas been imported successfully!"
+                        send "&7&oUse /skic import %arg 2% again to update your item!"
+        else if arg 1 is "delete":
+            if arg 2 is not set:
+                send "{@plugin-prefix} &cPlease provide an ID for the second argument."
+                stop
+            else:
+                if {skitemcreator.imported-items.database::*} contains arg 2:
+                    SKICRemoveImportedItem(arg 2)
+                    send "{@plugin-prefix} &b%arg 2% &ehas been deleted successfully!"
+                else:
+                    send "{@plugin-prefix} &e%arg 2% &cdoes not exist."        
+        else if arg 1 is "gui":
+            if arg 2 is not set:
+                set {_sort} to "ALL"
+            else if arg 2 is not "ALL" or "IMPORTED" or "CATEGORY":
+                send "{@plugin-prefix} &e%arg 2% &cmust be ALL, IMPORTED or CATEGORY."     
+                stop
+            if arg 2 is "CATEGORY":
+                if arg 3 is not set:
+                    send "{@plugin-prefix} Third argument must be a category."
+                    stop
+                if {skitemcreator.categories::*} does not contain arg 3:
+                    send "{@plugin-prefix} &e%arg 3% &cis not a valid category."
+                    stop
+                set {_sort} to "CATEGORY:%arg 3%"
+            else:
+                set {_sort} to arg 2
+            play sound "block.chest.open" with volume 1 and pitch 1 to player
+            SKICOpenGUI(player, 1, {_sort})
+
+
+on tab complete of "skitemcreator" or "skic" or "ski":
+    set tab completions for position 1 to "gui" and "get" and "reload" and "import" and "delete"
+    if tab arg-1 is "reload":
+        set tab completions for position 2 to "ALL" and {skitemcreator.items.database::*} and {skitemcreator.imported-items.database::*}
+    else if tab arg-1 is "get":
+        set tab completions for position 2 to {skitemcreator.items.database::*} and {skitemcreator.imported-items.database::*}
+    else if tab arg-1 is "delete":
+        set tab completions for position 2 to {skitemcreator.imported-items.database::*}
+    else if tab arg-1 is "gui":
+        set tab completions for position 2 to "ALL" and "IMPORTED" and "CATEGORY"
+        if tab arg-2 is "CATEGORY":
+            set tab completions for position 3 to {skitemcreator.categories::*}

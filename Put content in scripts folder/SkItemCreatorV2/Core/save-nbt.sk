@@ -1,0 +1,42 @@
+                                                                                        
+#Save NBT on place
+on place:   
+    string tag "SKIC-INTERNAL-NAME" of custom nbt of event-item is set
+    set {_id} to unformatted string tag "SKIC-INTERNAL-NAME" of custom nbt of event-item
+    {skitemcreator.items.database::%{_id}%::save-nbt} is true
+    set {_nbt} to nbt of event-block
+    set string tag "custom;SKIC-NBTSAVER-NBT" of {_nbt} to "%nbt of event-item%"
+    set string tag "custom;SKIC-NBTSAVER-ITEMTYPE" of {_nbt} to "%type of event-item%"
+
+#Self drop on break
+on break:
+    gamemode of player is not creative
+    string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of event-block is set 
+    clear drops  
+    set {_nbt} to string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of event-block
+    set {_i} to (string tag "custom;SKIC-NBTSAVER-ITEMTYPE" of nbt compound of event-block parsed as item) 
+    add nbt of {_nbt} to nbt compound of {_i}
+    drop {_i} at event-block
+ 
+#Disable physics
+on piston extend:
+    loop moved blocks:
+        if string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of loop-block is set:
+            cancel event
+on piston retract:
+    loop moved blocks:
+        if string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of loop-block is set:
+            cancel event
+
+#Keep NBT when exploded
+on explode:
+    loop exploded blocks:
+        string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of loop-block is set 
+        remove loop-block from exploded blocks
+        set {_nbt} to string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of loop-block
+        set {_i} to (string tag "custom;SKIC-NBTSAVER-ITEMTYPE" of nbt compound of loop-block parsed as item) 
+        add nbt of {_nbt} to nbt compound of {_i}
+        #Drop self ?
+        if {skitemcreator.items.database::%string tag "custom;SKIC-INTERNAL-NAME" of nbt compound of {_i}%::self-drop} is not false:
+            drop {_i} at loop-block
+        set loop-block to air

@@ -1,0 +1,6 @@
+#When an armor set is equipped.
+#STRING = armor set name
+#PLAYER = event-player
+event "skitemcreator-armor-set-equip":
+    event-values: string, player
+    pattern: [skitemcreator[ ]]armor[ ]set equip

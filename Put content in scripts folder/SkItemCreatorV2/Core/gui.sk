@@ -1,0 +1,77 @@
+#
+#Function for pagination (GUI)
+#
+function SKICPagination(page: number, elementsPerPage: number, objects: objects) :: objects:
+    set {_page} to floor({_page})-1
+    set {_elementsPerPage} to floor({_elementsPerPage})
+
+    set {_start} to {_page} * {_elementsPerPage}
+    set {_end} to {_start}+{_elementsPerPage}
+    loop integers from {_start}+1 to {_end}:
+        add (loop-value)th element of {_objects::*} to {_objs::*}
+    return {_objs::*}
+
+#
+#Open GUI
+#
+function SKICOpenGUI(p: player, page: integer, sort: string="ALL"):
+
+    set metadata tag "SKIC-SEARCH-PAGE" of {_p} to "%{_page}%"
+    set metadata tag "SKIC-SEARCH-SORT" of {_p} to {_sort}
+    open chest inventory with 6 rows named "&8SkItemsCreator - Search" to  {_p}
+    if {_sort} is "ALL":
+        set {_items::*} to {skitemcreator.items.database::*} and {skitemcreator.imported-items.database::*}
+        set {_objects::*} to SKICPagination({_page}, 45, {_items::*})
+    else if {_sort} is "IMPORTED":
+        set {_items::*} to {skitemcreator.imported-items.database::*}
+        set {_objects::*} to SKICPagination({_page}, 45, {_items::*})
+    else if {_sort} contains "CATEGORY:":
+        set {_category::*} to {_sort} split at ":"
+        set {_items::*} to {skitemcreator.items.database::*} and {skitemcreator.imported-items.database::*}
+        loop {_items::*} where [SKICItemCategoryFromID(input) = {_category::2}]:
+            add loop-value to {_obj::*}
+        set {_objects::*} to SKICPagination({_page}, 45, {_obj::*})
+
+    set {_slot} to 0
+    loop {_objects::*}:
+        if {skitemcreator.imported-items.database::*} contains loop-value:
+            set slot {_slot} of {_p}'s current inventory to {skitemcreator.imported-items.database::%loop-value%::final-item}
+        else:
+            set slot {_slot} of {_p}'s current inventory to {skitemcreator.items.database::%loop-value%::final-item}
+        add 1 to {_slot}
+
+    set {_slot} to 45
+    loop 9 times:
+        set slot {_slot} of {_p}'s current inventory to black stained glass pane named " "
+        add 1 to {_slot}
+
+    if {_page} > 1:
+        set slot 45 of {_p}'s current inventory to arrow named "&aPrevious page"
+    if size of {_items::*} > (45*{_page}):
+        set slot 53 of {_p}'s current inventory to arrow named "&aNext page"
+
+#
+#Inventory click in search gui
+#
+on inventory click:
+    name of player's current inventory is "&8SkItemsCreator - Search"
+    cancel event
+    if clicked slot is between 0 and 44:
+        play sound "entity.chicken.egg" with volume 1 and pitch 1 to player
+        give clicked slot to player
+        stop
+    else:
+        if name of clicked slot is "&aPrevious page":
+            set {_page} to metadata tag "SKIC-SEARCH-PAGE" of player parsed as integer
+            remove 1 from {_page}
+            set {_sort} to metadata tag "SKIC-SEARCH-SORT" of player
+
+            SKICOpenGUI(player, {_page}, {_sort})
+            play sound "ui.loom.select_pattern" with volume 1 and pitch 1 to player
+        else if name of clicked slot is "&aNext page":
+            set {_page} to metadata tag "SKIC-SEARCH-PAGE" of player parsed as integer
+            add 1 to {_page}
+            set {_sort} to metadata tag "SKIC-SEARCH-SORT" of player
+
+            SKICOpenGUI(player, {_page}, {_sort})
+            play sound "ui.loom.select_pattern" with volume 1 and pitch 1.2 to player

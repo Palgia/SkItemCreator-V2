@@ -1,0 +1,24 @@
+on left click:
+    SKICInternalNameOfItem(tool of player) is set
+    set {_id} to  SKICInternalNameOfItem(tool of player)
+    SKICExecuteSkriptEffect(player, {_id}, "LEFT_CLICK")
+
+on right click:
+    SKICInternalNameOfItem(tool of player) is set
+    set {_id} to  SKICInternalNameOfItem(tool of player)
+    SKICExecuteSkriptEffect(player, {_id}, "RIGHT_CLICK")
+
+on consume:
+    SKICInternalNameOfItem(tool of player) is set
+    set {_id} to  SKICInternalNameOfItem(tool of player)
+    SKICExecuteSkriptEffect(player, {_id}, "CONSUME")
+
+on damage:
+    SKICInternalNameOfItem(tool of attacker) is set
+    set {_id} to  SKICInternalNameOfItem(tool of attacker)
+    SKICExecuteSkriptEffect(attacker, {_id}, "DAMAGE")
+
+on shoot:
+    SKICInternalNameOfItem(tool of shooter) is set
+    set {_id} to  SKICInternalNameOfItem(tool of shooter)
+    SKICExecuteSkriptEffect(shooter, {_id}, "SHOOT")

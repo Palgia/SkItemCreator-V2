@@ -1,0 +1,160 @@
+#
+#MISC OPTIONS
+#
+options:
+    #Plugin prefix
+    plugin-prefix: <##084CFB>[&lS<##2B47ED>&lk<##4F41DF>&lI<##723CD1>&lt<##9537C3>&le<##B832B5>&lm<##DC2CA7>&lC<##FF2799>&lr<##FA2A96>&le<##F42D92>&la<##EF308F>&lt<##E9348C>&lo<##E43789>&lr<##DE3A85>&lV<##D93D82>&l2]
+
+#
+#Load armor-sets.yml
+#
+function SKICLoadArmorSets():
+
+    #
+    #Armor sets
+    #
+    #Unload everything just to be sure
+    loop all of the currently loaded yaml files:
+        unload yaml loop-value-1
+
+    load yaml "plugins/SkItemCreatorV2/armor-sets.yml" as "armor-sets"
+    delete {skitemcreator.armor-sets::*}
+
+    set {_skic-items::*} to {skitemcreator.items.database::*} and {skitemcreator.imported-items.database::*}
+
+
+    loop yaml node keys "armor-sets" from "armor-sets":      
+        set {_node::*} to "%loop-node%" split at "."
+        if {_node::2} is set:
+            set {_set} to {_node::2}
+            #Register armor set
+            if {skitemcreator.armor-sets::*} does not contain {_set}:
+                add {_set} to {skitemcreator.armor-sets::*}
+
+            #
+            #Equip message
+            #
+            set {skitemcreator.armor-sets::%{_set}%::equip-message} to formatted yaml value "armor-sets.%{_set}%.equip-message" from "armor-sets"
+            if {skitemcreator.armor-sets::%{_set}%::equip-message} is not set:
+                set {skitemcreator.armor-sets::%{_set}%::equip-message} to "&eArmor set activated!"
+ 
+            #
+            #Equip sound
+            #
+            set {skitemcreator.armor-sets::%{_set}%::equip-sound::value} to yaml value "armor-sets.%{_set}%.equip-sound.value" from "armor-sets"
+            if {skitemcreator.armor-sets::%{_set}%::equip-sound::value} is set:
+                set {skitemcreator.armor-sets::%{_set}%::equip-sound::volume} to yaml value "armor-sets.%{_set}%.equip-sound.volume" from "armor-sets"
+                set {skitemcreator.armor-sets::%{_set}%::equip-sound::pitch} to yaml value "armor-sets.%{_set}%.equip-sound.pitch" from "armor-sets"
+            else:
+                set {skitemcreator.armor-sets::%{_set}%::equip-sound::value} to "entity.player.levelup"
+                set {skitemcreator.armor-sets::%{_set}%::equip-sound::pitch} to 1.2
+                set {skitemcreator.armor-sets::%{_set}%::equip-sound::volume} to 1
+
+            #
+            #Skript
+            #
+            set {skitemcreator.armor-sets::%{_set}%::skript::on-equip::*} to yaml list "armor-sets.%{_set}%.skript.on-equip" from "armor-sets"
+            set {skitemcreator.armor-sets::%{_set}%::skript::on-unequip::*} to yaml list "armor-sets.%{_set}%.skript.on-unequip" from "armor-sets"
+
+            #
+            #Items
+            #
+            #Helmet
+            set {_item} to yaml value "armor-sets.%{_set}%.items.helmet" from "armor-sets"
+            if {_item} is set:
+                if {_skic-items::*} contains {_item}:
+                    set {skitemcreator.armor-sets::%{_set}%::helmet} to {_item}
+                    if {skitemcreator.imported-items.database::*} contains {_item}:
+                        set string tag "SKIC-ARMOR-SET" of custom nbt of {skitemcreator.imported-items.database::%{_item}%::final-item} to {_set}
+                    else:
+                        set string tag "SKIC-ARMOR-SET" of custom nbt of {skitemcreator.items.database::%{_item}%::final-item} to {_set}
+                    add 1 to {skitemcreator.armor-sets::%{_set}%::size}
+            #Chestplate
+            set {_item} to yaml value "armor-sets.%{_set}%.items.chestplate" from "armor-sets"
+            if {_item} is set:
+                if {_skic-items::*} contains {_item}:
+                    set {skitemcreator.armor-sets::%{_set}%::chestplate} to {_item}
+                    if {skitemcreator.imported-items.database::*} contains {_item}:
+                        set string tag "SKIC-ARMOR-SET" of custom nbt of {skitemcreator.imported-items.database::%{_item}%::final-item} to {_set}
+                    else:
+                        set string tag "SKIC-ARMOR-SET" of custom nbt of {skitemcreator.items.database::%{_item}%::final-item} to {_set}
+                    add 1 to {skitemcreator.armor-sets::%{_set}%::size}
+            #Leggings
+            set {_item} to yaml value "armor-sets.%{_set}%.items.leggings" from "armor-sets"
+            if {_item} is set:
+                if {_skic-items::*} contains {_item}:
+                    set {skitemcreator.armor-sets::%{_set}%::leggings} to {_item}
+                    if {skitemcreator.imported-items.database::*} contains {_item}:
+                        set string tag "SKIC-ARMOR-SET" of custom nbt of {skitemcreator.imported-items.database::%{_item}%::final-item} to {_set}
+                    else:
+                        set string tag "SKIC-ARMOR-SET" of custom nbt of {skitemcreator.items.database::%{_item}%::final-item} to {_set}
+                    add 1 to {skitemcreator.armor-sets::%{_set}%::size}
+            #Boots
+            set {_item} to yaml value "armor-sets.%{_set}%.items.boots" from "armor-sets"
+            if {_item} is set:
+                if {_skic-items::*} contains {_item}:
+                    set {skitemcreator.armor-sets::%{_set}%::boots} to {_item}
+                    if {skitemcreator.imported-items.database::*} contains {_item}:
+                        set string tag "SKIC-ARMOR-SET" of custom nbt of {skitemcreator.imported-items.database::%{_item}%::final-item} to {_set}
+                    else:
+                        set string tag "SKIC-ARMOR-SET" of custom nbt of {skitemcreator.items.database::%{_item}%::final-item} to {_set}
+                    add 1 to {skitemcreator.armor-sets::%{_set}%::size}    
+
+    send "{@plugin-prefix} &e%size of {skitemcreator.armor-sets::*}% &farmor sets loaded!" to console
+
+#
+#ARMOR CHANGE EVENT
+#
+on armor change:
+    wait 1 tick
+    #Call event for unequipping armor set
+    if metadata tag "SKIC-CURRENT-ARMOR-SET" of player is set:
+        set {_event::player} to player
+        set {_event::string} to  metadata tag "SKIC-CURRENT-ARMOR-SET" of player
+        call event (custom event "skitemcreator-armor-set-unequip" with values {_event::*})
+        set {_set} to metadata tag "SKIC-CURRENT-ARMOR-SET" of player
+        #Parse unequip effects 
+        if {skitemcreator.armor-sets::%{_set}%::skript::on-unequip::*} is set:
+            loop {skitemcreator.armor-sets::%{_set}%::skript::on-unequip::*}:
+                if loop-value contains "wait":
+                    set {_wait::*} to loop-value split at "wait "
+                    set {_time} to {_wait::2} parsed as timespan
+                    wait {_time}
+                else:
+                    parse effect loop-value from player
+    set {_cooldown} to difference between {skitemcreator.player.armor-set-cooldown::%uuid of player%} and now
+    if {_cooldown} is less than 3 ticks:
+        stop
+    set {skitemcreator.player.armor-set-cooldown::%uuid of player%} to now
+    delete metadata tag "SKIC-CURRENT-ARMOR-SET" of player
+    add helmet of player to {_check::*}
+    add chestplate of player to {_check::*}
+    add leggings of player to {_check::*}
+    add boots of player to {_check::*}
+    loop {_check::*}:
+        if string tag "SKIC-ARMOR-SET" of custom nbt of loop-value is set:
+            set {_set} to string tag "SKIC-ARMOR-SET" of custom nbt of loop-value
+            if {_size::*} does not contain {_set}:
+                add {_set} to {_size::*}
+            add 1 to {_size::%{_set}%}
+    loop {_size::*}:
+        if {_size::%loop-value%} = {skitemcreator.armor-sets::%{_set}%::size}:
+            set metadata tag "SKIC-CURRENT-ARMOR-SET" of player to {_set}
+            #Send armor set message
+            send {skitemcreator.armor-sets::%{_set}%::equip-message} to player
+            #Play armor set sound
+            play sound {skitemcreator.armor-sets::%{_set}%::equip-sound::value} with volume {skitemcreator.armor-sets::%{_set}%::equip-sound::volume} and pitch {skitemcreator.armor-sets::%{_set}%::equip-sound::pitch} to player
+            #Call event
+            set {_event::player} to player
+            set {_event::set} to  {_set}
+            call event (custom event "skitemcreator-armor-set-equip" with values {_event::*})
+            #Parse equip effects 
+            if {skitemcreator.armor-sets::%{_set}%::skript::on-equip::*} is set:
+                loop {skitemcreator.armor-sets::%{_set}%::skript::on-equip::*}:
+                    if loop-value-2 contains "wait":
+                        set {_wait::*} to loop-value-2 split at "wait "
+                        set {_time} to {_wait::2} parsed as timespan
+                        wait {_time}
+                    else:
+                        parse effect loop-value-2 from player
+            stop loop

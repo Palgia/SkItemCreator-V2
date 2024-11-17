@@ -1,0 +1,140 @@
+#
+#Return the internal ID of an item
+#
+function SKICInternalNameOfItem(i: item) :: string:
+
+    return string tag "SKIC-INTERNAL-NAME" of custom nbt of {_i}
+
+#
+#Return the Item Category of an item
+#
+function SKICItemCategoryOf(i: item) :: string:
+
+    if SKICInternalNameOfItem({_i}) is set:
+        if {skitemcreator.items.database::%(SKICInternalNameOfItem({_i}))%::item-category} is set:
+            return {skitemcreator.items.database::%(SKICInternalNameOfItem({_i}))%::item-category}
+#
+#Return the Item Category from an ID
+#
+function SKICItemCategoryFromID(id: string) :: string:
+
+    return {skitemcreator.items.database::%{_id}%::item-category} 
+
+#
+#Return all items inside a category
+#
+function SKICAllItemsOfCategory(category: string) :: strings:
+
+    loop {skitemcreator.items.database::*} where [{skitemcreator.items.database::%input%::item-category} = {_category}]:
+        add loop-value to {_return::*}
+    return {_return::*}
+
+#
+#Return all disabled behaviros of an item
+#
+function SKICGetAllDisabledBehaviors(i: item) :: strings:
+
+    return string list tag "SKIC-DISABLED-BEHAVIORS" of custom nbt of {_i}
+
+#
+#Returns the rarity of an item
+#
+function SKICGetRarity(i: item) :: string:
+
+    return string tag "SKIC-RARITY" of custom nbt of {_i}
+
+#
+#Function to return an item from an ID
+#
+function SKICGetItemFromID(id: string) :: item:
+
+    if {skitemcreator.items.database::*} contains {_id}:
+        return {skitemcreator.items.database::%{_id}%::final-item}
+    else if {skitemcreator.imported-items.database::*} contains {_id}:
+        return {skitemcreator.imported-items.database::%{_id}%::final-item}
+
+#
+#Import an item in SkItemCreator (returns true if import has been done)
+#
+function SKICImportItem(i: item, id: string):
+
+    if {skitemcreator.imported-items.database::*} contains {_id}:
+        set string tag "SKIC-INTERNAL-NAME" of custom nbt of {_i} to {_id}
+        set {skitemcreator.imported-items.database::%{_id}%::final-item} to {_i}
+    else:
+        set string tag "SKIC-INTERNAL-NAME" of custom nbt of {_i} to {_id}
+        add {_id} to {skitemcreator.imported-items.database::*}
+        set {skitemcreator.imported-items.database::%{_id}%::final-item} to {_i}
+
+#
+#Remove an imported item
+#
+function SKICRemoveImportedItem(id: string):
+
+    if {skitemcreator.imported-items.database::*} contains {_id}:
+
+        delete {skitemcreator.imported-items.database::%{_id}%::final-item}
+        remove {_id} from {skitemcreator.imported-items.database::*}
+
+#
+#Get the permission to use an item, if it has one
+#
+function SKICGetPermission(i: item) :: string:
+
+    return string tag "SKIC-PERMISSION" of custom nbt of {_i}
+
+#
+#Execute skript effect
+#
+function SKICExecuteSkriptEffect(p: player, id: string, event: string):
+
+    loop {skitemcreator.items.database::%{_id}%::skript::*} where [{skitemcreator.items.database::%{_id}%::skript::%input%::event} is {_event}]:
+        add loop-value to {_nodes::*}
+    loop {_nodes::*}:
+        set {_node} to loop-value
+        if {skitemcreator.items.database::%{_id}%::skript::%{_node}%::cooldown} is set:
+            set {_diff} to difference between {skitemcreator.player.database::%uuid of {_p}%::skript-cooldown::%{_id}%} and now
+            set {_time} to "%{skitemcreator.items.database::%{_id}%::skript::%{_node}%::cooldown}% ticks" parsed as timespan
+            if {_diff} is less than {_time}:
+                stop
+            set {_can-execute} to true
+            set {skitemcreator.player.database::%uuid of {_p}%::skript-cooldown::%{_id}%} to now
+        else:
+            set {_can-execute} to true
+    
+        if {_can-execute} is true:
+            loop {skitemcreator.items.database::%{_id}%::skript::%{_node}%::execute::*}:
+                if loop-value-2 contains "wait":
+                    set {_wait::*} to loop-value-2 split at "wait "
+                    set {_time} to {_wait::2} parsed as timespan
+                    wait {_time}
+                else:
+                    parse effect loop-value-2 from {_p}
+
+#
+#Execute mythic mobs skill
+#
+function SKICExecuteMythicSkill(p: player, id: string, event: string):
+
+    parse if plugin "MythicMobs" is enabled:
+        loop {skitemcreator.items.database::%{_id}%::mythic-skills::*} where [{skitemcreator.items.database::%{_id}%::mythic-skills::%input%::event} is {_event}]:
+            add loop-value to {_nodes::*}
+        loop {_nodes::*}:
+            set {_node} to loop-value    
+            set {_skill} to {skitemcreator.items.database::%{_id}%::mythic-skills::%{_node}%::skill}
+            set {_mmAPI} to instance of plugin "MythicMobs"
+            set {_mythic.bukkitapihelper} to class "io.lumine.mythic.bukkit.BukkitAPIHelper"
+            set {_mythic.skilltrigger} to class "io.lumine.mythic.api.skills.SkillTrigger"
+            set {_mythic.skillcaster} to class "io.lumine.mythic.api.skills.SkillCaster"
+            set {_mmHelper} to new {_mythic.bukkitapihelper}()
+            set {_mmInstance} to {_mmAPI}.getAPIHelper().getMythicMobInstance({_p})
+            if {_mmInstance} is not null:
+                {_mmHelper}.castSkill({_p}, {_skill})
+
+#
+#Apply a rarity to an item
+#
+function SKICReturnRarityLine(rarity: string) :: string:
+
+    if {skitemcreator.main-config::rarities::*} contains {_rarity}:
+        return {skitemcreator.main-config::rarities::%{_rarity}%::display}
