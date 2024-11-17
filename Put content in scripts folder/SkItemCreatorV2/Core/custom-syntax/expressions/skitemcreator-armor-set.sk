@@ -1,0 +1,5 @@
+#
+#Returns a custom item from SkItemCreator
+expression [skitemcreator[ ]]armor set of %player%:
+    get:
+        return metadata tag "SKIC-CURRENT-ARMOR-SET" of expr-1
