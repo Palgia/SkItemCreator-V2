@@ -721,3 +721,4 @@ function SKICLoadPropertiesOfItem(file: string):
     #Replace placeholders
     #
     set {skitemcreator.items.database::%{_filename}%::final-item} to SKICReplaceLorePlaceholders({skitemcreator.items.database::%{_filename}%::final-item})
+    set {skitemcreator.items.database::%{_filename}%::final-item} to SKICReplaceNamePlaceholders({skitemcreator.items.database::%{_filename}%::final-item}) 
