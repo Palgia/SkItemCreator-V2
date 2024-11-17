@@ -711,6 +711,13 @@ function SKICLoadPropertiesOfItem(file: string):
                                 set {skitemcreator.items.database::%{_filename}%::stats::%{_st::1}%::static-amount} to {_int}
                                 if {_int} is set:
                                     set {skitemcreator.items.database::%{_filename}%::final-item} to skRPGItemsAddonSetStat({skitemcreator.items.database::%{_filename}%::final-item}, {_st::1}, {_int}, {_hide-stats})
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Rarity
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        else if {_key} is "rarity":
+            set string tag "SKIC-RARITY" of {skitemcreator.items.database::%{_filename}%::final-item} to yaml value "rarity" of {_yaml}
         #
         #Unload yaml when everything is loaded
         #
