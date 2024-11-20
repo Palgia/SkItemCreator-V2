@@ -205,3 +205,20 @@ stats:
 
 #[OPTIONAL] Hide stats in lore
 hide-stat-lore: false
+
+#[OPTIONAL] Custom damage. Use custom-damage placeholder for displaying its damage
+#           Can be single (custom-damage: 20) or ranged (custom-damage: 10~30)
+custom-damage: 25
+#Example for ranged damage:
+#custom-damage: 0~120
+
+#[OPTIONAL] Define conditions for your item. Learn more here: https://github.com/Palgia/SkItemCreator-V2/wiki/Conditions
+conditions:
+  xp-level:
+    message: "&4✖ &cThis item requires an experience level of &e{value} &cor higher."
+    comparator: ">="
+    value: 5
+  test-condition:
+    message: "&4✖ &cThis item requires the test-variable to be greater than &e{value}"
+    comparator: ">"
+    value: 3

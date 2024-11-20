@@ -5,7 +5,9 @@ item:
 name: "<#F8FB08>&lG<#F0F12A>&lo<#E8E84D>&ld<#DFDE6F>&l'<#D7D592>&ls <#CCBA9F>&lA<#C9A98A>&lp<#C59775>&lp<#C28660>&ll<#BF754B>&le"
 
 lore:
-  - "&fGives powerful effects!"
+  - "&7&oOnly a true god can consume it!"
+  - ""
+  - "&fGives &e&lOP &feffects!"
 
 skript:
   1:

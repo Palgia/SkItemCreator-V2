@@ -1,9 +1,53 @@
 #
 #Returns the value of a global placeholder
 #
-function SKICGetGlobalPAPIPlaceholder(string: string) :: string:
+function SKICGetGlobalPAPIPlaceholder(string: string) :: object:
 
     parse if plugin "PlaceholderAPI" is enabled:
         set {_class} to class "me.clip.placeholderapi.PlaceholderAPI"
         set {_string} to "%%%{_string}%%%"
         return {_class}.setPlaceholders(null, {_string})
+#
+#Returns the value of a player placeholder
+#
+function SKICGetPlayerPAPIPlaceholder(string: string, p: player) :: object:
+
+    parse if plugin "PlaceholderAPI" is enabled:
+        set {_class} to class "me.clip.placeholderapi.PlaceholderAPI"
+        set {_string} to "%%%{_string}%%%"
+        return {_class}.setPlaceholders({_p}, {_string})
+
+#
+#Checks comparators
+#
+function SKICPlaceholderEquals(placeholder: object, value: object, comparator: string) :: boolean:
+
+    if {_comparator} is "=":
+        if "%{_placeholder}%" = "%{_value}%":
+            return true
+        else:
+            return false
+    else if {_comparator} is ">=":
+        set {_placeholder} to {_placeholder} parsed as integer
+        if {_placeholder} >= {_value}:
+            return true
+        else:
+            return false
+    else if {_comparator} is ">":
+        set {_placeholder} to {_placeholder} parsed as integer
+        if {_placeholder} > {_value}:
+            return true
+        else:
+            return false
+    else if {_comparator} is "<=":
+        set {_placeholder} to {_placeholder} parsed as integer
+        if {_placeholder} <= {_value}:
+            return true
+        else:
+            return false
+    else if {_comparator} is "<":
+        set {_placeholder} to {_placeholder} parsed as integer
+        if {_placeholder} < {_value}:
+            return true
+        else:
+            return false

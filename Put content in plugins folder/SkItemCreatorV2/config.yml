@@ -18,3 +18,33 @@ rarities:
     display: "<#A51443>&lUNIQUE"
   admin:
     display: "&c&lADMIN"
+
+#
+#Define the display of the custom-damage value.
+#Useful for your rpg items! (Better than the attribute ugly thing)
+#
+custom-damage-display: "&c⚔ Damage: &f{damage}"
+
+#
+#Create your own conditions here!
+#
+conditions:
+  #A condition to check the xp level of a player
+  #You need to use /papi ecloud import Player for importing vanilla placeholders.
+  xp-level:
+    lore-display: "&4◆ &aXP Level &4required: &f{value}"
+    check:
+      #List of placeholder types: PAPI-GLOBAL, PAPI-PLAYER, VARIABLE
+      placeholder-type: PAPI-PLAYER
+      #Write placeholder without %
+      placeholder: "player_level"
+      
+  #A condition to check a skript variable as a example
+  test-condition:
+    lore-display: "&4◆ &eTest variable &4required: &f{value}"
+    check:
+      #List of placeholder types: PAPI-GLOBAL, PAPI-PLAYER, VARIABLE
+      placeholder-type: VARIABLE
+      #Write the variable you want to check, without { and }.
+      #You can write {uuid} as a placeholder for player's uuid and {player} as a placeholder for player's name.
+      placeholder: "test-variable::{uuid}"

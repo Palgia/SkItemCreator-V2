@@ -30,6 +30,15 @@ command /skitemcreator [<string="gui">] [<string="ALL">] [<string>]:
                     send "{@plugin-prefix} &e%arg 2% &cdoes not exist."                    
             else:
                 send "{@plugin-prefix} &cSecond argument is missing."
+        else if arg 1 is "randomgen":
+            if arg 2 is set:
+                if SKICGetItemFromID(arg 2) is set:
+                    send "{@plugin-prefix} &b%arg 2% &egiven successfully!"    
+                    give SKICRandomGenerate(arg 2) to player
+                else:
+                    send "{@plugin-prefix} &e%arg 2% &cdoes not exist."                    
+            else:
+                send "{@plugin-prefix} &cSecond argument is missing."
         else if arg 1 is "import":
             if arg 2 is not set:
                 send "{@plugin-prefix} &cPlease provide an ID for the second argument."
@@ -76,10 +85,10 @@ command /skitemcreator [<string="gui">] [<string="ALL">] [<string>]:
 
 
 on tab complete of "skitemcreator" or "skic" or "ski":
-    set tab completions for position 1 to "gui" and "get" and "reload" and "import" and "delete"
+    set tab completions for position 1 to "gui" and "get" and "randomgen" and "reload" and "import" and "delete"
     if tab arg-1 is "reload":
         set tab completions for position 2 to "ALL" and {skitemcreator.items.database::*} and {skitemcreator.imported-items.database::*}
-    else if tab arg-1 is "get":
+    else if tab arg-1 is "get" or "randomgen":
         set tab completions for position 2 to {skitemcreator.items.database::*} and {skitemcreator.imported-items.database::*}
     else if tab arg-1 is "delete":
         set tab completions for position 2 to {skitemcreator.imported-items.database::*}

@@ -1,0 +1,11 @@
+on damage:
+    attacker is set
+    SKICInternalNameOfItem(tool of attacker) is set
+    set {_id} to SKICInternalNameOfItem(tool of attacker)
+    #If single damage
+    if {skitemcreator.items.database::%{_id}%::damage} is set:
+        set {_dmg} to {skitemcreator.items.database::%{_id}%::damage}
+    #Else if ranged damage
+    else if {skitemcreator.items.database::%{_id}%::damage::min} is set:
+        set {_dmg} to random integer between {skitemcreator.items.database::%{_id}%::damage::min} and {skitemcreator.items.database::%{_id}%::damage::max}   
+    set damage to {_dmg}

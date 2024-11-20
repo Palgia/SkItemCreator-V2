@@ -4,6 +4,7 @@
 function SKICReplaceLorePlaceholders(i: item) :: item:
 
     set {_lore::*} to lore of {_i}
+    set {_id} to SKICInternalNameOfItem({_i})
 
     #Replace placeholders in lore
     loop {_lore::*}:
@@ -47,8 +48,31 @@ function SKICReplaceLorePlaceholders(i: item) :: item:
                 replace all "{placeholder:%{_placeholder-type}%:%{_placeholder-value}%}" with SKICReturnRarityLine({_placeholder-value}) in {_lore::%loop-index%}
                 set string tag "SKIC-RARITY" of custom nbt of {_i} to {_placeholder-value}
 
+            #
+            #Custom damage
+            #
+            if {_placeholder-type} is "custom-damage":
+                set {_dmg-line} to {skitemcreator.main-config::custom-damage-display}
+                #Single damage
+                if {skitemcreator.items.database::%{_id}%::damage} is set:
+                    replace all "{damage}" with "%{skitemcreator.items.database::%{_id}%::damage}%" in {_dmg-line}
+                #Ranged
+                else if {skitemcreator.items.database::%{_id}%::damage::min} is set:
+                    replace all "{damage}" with "%{skitemcreator.items.database::%{_id}%::damage::min}%&8-&f%{skitemcreator.items.database::%{_id}%::damage::max}%" in {_dmg-line}
+                replace all "{placeholder:%{_placeholder-type}%}" with {_dmg-line} in {_lore::%loop-index%}
+
+        #
+        #Conditions
+        #
+        if {_placeholder-type} is "condition":
+            set {_line} to {skitemcreator.main-config::conditions::%{_placeholder-value}%::lore-display}
+            replace all "{value}" with "%{skitemcreator.items.database::%{_id}%::conditions::%{_placeholder-value}%::value}%" in {_line}
+            replace all "{placeholder:%{_placeholder-type}%:%{_placeholder-value}%}" with {_line} in {_lore::%loop-index%}
+
     set lore of {_i} to {_lore::*}
     return {_i}
+
+
 
 #
 #Replace placeholders in name of items
@@ -56,6 +80,7 @@ function SKICReplaceLorePlaceholders(i: item) :: item:
 function SKICReplaceNamePlaceholders(i: item) :: item:
 
     set {_name} to name of {_i}
+    set {_id} to SKICInternalNameOfItem({_i})
 
     #Replace placeholders in name
     if {_name} contains "{placeholder:":
@@ -96,6 +121,28 @@ function SKICReplaceNamePlaceholders(i: item) :: item:
         if {_placeholder-type} is "rarity":
             replace all "{placeholder:%{_placeholder-type}%:%{_placeholder-value}%}" with SKICReturnRarityLine({_placeholder-value}) in {_name}
             set string tag "SKIC-RARITY" of custom nbt of {_i} to {_placeholder-value}
+
+        #
+        #Custom damage
+        #
+        if {_placeholder-type} is "custom-damage":
+            set {_dmg-line} to {skitemcreator.main-config::custom-damage-display}
+            #Single damage
+            if {skitemcreator.items.database::%{_id}%::damage} is set:
+                replace all "{damage}" with "%{skitemcreator.items.database::%{_id}%::damage}%" in {_name}
+            #Ranged
+            else if {skitemcreator.items.database::%{_id}%::damage::min} is set:
+                replace all "{damage}" with "&f%{skitemcreator.items.database::%{_id}%::damage::min}%&8-&f%{skitemcreator.items.database::%{_id}%::damage::max}%" in {_dmg-line}
+            replace all "{placeholder:%{_placeholder-type}%}" with formatted {_dmg-line} in {_name}
+
+        #
+        #Conditions
+        #
+        if {_placeholder-type} is "condition":
+            set {_line} to {skitemcreator.main-config::conditions::%{_placeholder-value}%::lore-display}
+            replace all "{value}" with "%{skitemcreator.items.database::%{_id}%::conditions::%{_placeholder-value}%::value}%" in {_line}
+            replace all "{placeholder:%{_placeholder-type}%:%{_placeholder-value}%}" with {_line} in {_name}
+
 
     set name of {_i} to {_name}
     return {_i}

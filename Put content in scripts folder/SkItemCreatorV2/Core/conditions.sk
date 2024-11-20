@@ -1,0 +1,139 @@
+on async load:
+    locally suppress variable save warnings
+    locally suppress conjunction warnings
+    locally suppress starting expressions warnings
+
+#
+#Check conditions
+#
+function SKICCheckConditions(p: player, i: item) :: boolean:
+
+    set {_id} to SKICInternalNameOfItem({_i})
+
+    if {skitemcreator.items.database::%{_id}%::conditions::*} is set:
+        loop {skitemcreator.items.database::%{_id}%::conditions::*}:
+            set {_condition} to loop-value
+            #If condition exists in config.yml
+            if {skitemcreator.main-config::conditions::*} contains {_condition}:
+                set {_comparator} to  {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::comparator}
+                set {_value} to {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::value}
+
+                #If PAPI-PLAYER
+                if {skitemcreator.main-config::conditions::%{_condition}%::placeholder-type} is "PAPI-PLAYER":
+                    set {_placeholder} to SKICGetPlayerPAPIPlaceholder({skitemcreator.main-config::conditions::%{_condition}%::placeholder}, {_p})
+                    if SKICPlaceholderEquals({_placeholder}, {_value}, {_comparator}) is false:
+                        set {_msg} to {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::message}
+                        replace all "{value}" with "%{_value}%" in {_msg}
+                        send {_msg} to {_p} 
+                        return false
+                        stop
+                #IF PAPI-GLOBAL
+                else if {skitemcreator.main-config::conditions::%{_condition}%::placeholder-type} is "PAPI-PLAYER":
+                    set {_placeholder} to SKICGetGlobalPAPIPlaceholder({skitemcreator.main-config::conditions::%{_condition}%::placeholder})
+                    if SKICPlaceholderEquals({_placeholder}, {_value}, {_comparator}) is false:
+                        set {_msg} to {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::message}
+                        replace all "{value}" with "%{_value}%" in {_msg}
+                        send {_msg} to {_p} 
+                        return false
+                        stop
+                #VARIABLE
+                else if {skitemcreator.main-config::conditions::%{_condition}%::placeholder-type} is "VARIABLE":
+                    set {_var} to {skitemcreator.main-config::conditions::%{_condition}%::placeholder}
+                    replace all "{uuid}" with uuid of {_p} in {_var}
+                    replace all "{player}" with name of {_p} in {_var}
+                    set {_final-var} to {%{_var}%}
+                    if {_comparator} is "=":
+                        if "%{_final-var}%" = "%{_value}%":
+                            return true
+                        else:
+                            set {_msg} to {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::message}
+                            replace all "{value}" with "%{_value}%" in {_msg}
+                            send {_msg} to {_p} 
+                            return false
+                            stop
+                    else if {_comparator} is ">":
+                        if {_final-var} > {_value}:
+                            return true
+                        else:
+                            set {_msg} to {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::message}
+                            replace all "{value}" with "%{_value}%" in {_msg}
+                            send {_msg} to {_p} 
+                            return false
+                            stop
+                    else if {_comparator} is ">=":
+                        if {_final-var} >= {_value}:
+                            return true
+                        else:
+                            set {_msg} to {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::message}
+                            replace all "{value}" with "%{_value}%" in {_msg}
+                            send {_msg} to {_p} 
+                            return false
+                            stop
+                    else if {_comparator} is "<":
+                        if {_final-var} < {_value}:
+                            return true
+                        else:
+                            set {_msg} to {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::message}
+                            replace all "{value}" with "%{_value}%" in {_msg}
+                            send {_msg} to {_p} 
+                            return false
+                            stop
+                    else if {_comparator} is "<=":
+                        if {_final-var} <= {_value}:
+                            return true
+                        else:
+                            set {_msg} to {skitemcreator.items.database::%{_id}%::conditions::%{_condition}%::message}
+                            replace all "{value}" with "%{_value}%" in {_msg}
+                            send {_msg} to {_p} 
+                            return false
+                            stop
+        return true
+    else:
+        return true
+
+#
+#Check conditions in events
+#
+on left click:
+    SKICInternalNameOfItem(tool of player) is set
+    if SKICCheckConditions(player, tool of player) is false:
+        cancel event
+
+on damage:
+    attacker is a player
+    SKICInternalNameOfItem(tool of attacker) is set
+    if SKICCheckConditions(attacker, tool of attacker) is false:
+        cancel event
+
+on shoot:
+    SKICInternalNameOfItem(tool of shooter) is set
+    if SKICCheckConditions(shooter, tool of shooter) is false:
+        cancel event
+
+on right click:
+    SKICInternalNameOfItem(tool of player) is set
+    if SKICCheckConditions(player, tool of player) is false:
+        cancel event
+
+on armor change:
+    wait 1 tick
+    set {_helmet} to helmet of player
+    if SKICInternalNameOfItem({_helmet}) is set:
+        if SKICCheckConditions(player, {_helmet}) is false:
+            set helmet of player to air
+            give {_helmet} to player
+    set {_chestplate} to chestplate of player
+    if SKICInternalNameOfItem({_hchestplate}) is set:
+        if SKICCheckConditions(player, {_chestplate}) is false:
+            set chestplate of player to air
+            give {_chestplate} to player
+    set {_leggings} to leggings of player
+    if SKICInternalNameOfItem({_leggingst}) is set:
+        if SKICCheckConditions(player, {_hleggings}) is false:
+            set leggings of player to air
+            give {_leggings} to player
+    set {_boots} to boots of player
+    if SKICInternalNameOfItem({_boots}) is set:
+        if SKICCheckConditions(player, {_boots}) is false:
+            set boots of player to air
+            give {_boots} to player

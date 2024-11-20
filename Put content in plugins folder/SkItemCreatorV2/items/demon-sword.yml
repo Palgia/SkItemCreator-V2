@@ -1,0 +1,38 @@
+item:
+  type: VANILLA
+  value: NETHERITE_SWORD
+
+name: "&c&lDEMON SWORD"
+
+lore:
+  - "&fA blade imbued with"
+  - "&fdemonic power..."
+  - ""
+  - "{placeholder:stat:strength}"
+  - "{placeholder:stat:crit_damage}"
+  - "{placeholder:stat:crit_chance}"
+
+enchants:
+  - "fire_aspect:2"
+  - "sharpness_5"
+
+attributes:
+  1:
+    name: "minecraft:attack_speed"
+    operation: add_value
+    amount: -1
+    slot: hand
+    show-in-tooltip: true
+  2:
+    name: "minecraft:attack_knockback"
+    operation: add_value
+    amount: 0.4
+    slot: hand
+    show-in-tooltip: true
+
+stats:
+  - "strength:12"
+  - "crit_damage:9~11"
+  - "crit_chance:4~6"
+
+hide-stat-lore: true

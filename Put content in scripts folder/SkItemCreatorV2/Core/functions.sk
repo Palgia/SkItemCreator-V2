@@ -138,3 +138,24 @@ function SKICReturnRarityLine(rarity: string) :: string:
 
     if {skitemcreator.main-config::rarities::*} contains {_rarity}:
         return {skitemcreator.main-config::rarities::%{_rarity}%::display}
+
+#
+#Function to random generate an item (useful for items with stat ranges)
+#ONLY WORKS IF SKRPG AND SKRPGITEMSADDON ARE ENABLED
+#
+function SKICRandomGenerate(itemid: string) :: item:
+
+    #Check if SkRPG and SkRPGItemsAddon are loaded
+    parse if script "SkRPG/Main/!Main/SkRPG.sk" is loaded:
+        parse if script "SkRPG/Main/Addons/SkRPGItemsAddon.sk" is loaded:
+            if {skitemcreator.items.database::*} contains {_itemid}:
+                set {_item} to {skitemcreator.items.database::%{_itemid}%::final-item}
+                loop {skitemcreator.items.database::%{_itemid}%::stats::*}:
+                    #If stat result can be random
+                    if {skitemcreator.items.database::%{_itemid}%::stats::%loop-value%::min} is set: 
+                        set {_r} to random integer between {skitemcreator.items.database::%{_itemid}%::stats::%loop-value%::min} and {skitemcreator.items.database::%{_itemid}%::stats::%loop-value%::max}
+                        set {_r} to rounded {_r}
+                        set {_item} to skRPGItemsAddonSetStat({_item}, loop-value, {_r})
+                    else:
+                        set {_item} to skRPGItemsAddonSetStat({_item}, loop-value, {skitemcreator.items.database::%{_itemid}%::stats::%loop-value%::static-amount})
+                return {_item}

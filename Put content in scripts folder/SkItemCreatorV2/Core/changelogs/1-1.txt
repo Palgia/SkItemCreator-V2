@@ -1,0 +1,25 @@
+VERSION 1.1
+
+
+-- config.yml
+Added 'custom-damage-display' option.
+Added 'conditions' for creating custom conditions.
+
+
+
+
+-- items config
+Added 'custom-damage' option.
+Added 'conditions' option.
+
+
+
+-- placeholders
+Added placeholder type 'custom-damage'. Requires option 'custom-damage' in your item.
+Added placeholder type 'condition'. Requires option 'condition' in your item.
+
+
+
+-- other
+Added custom-damage.sk for handling custom damage.
+Added conditions.sk for handling custom conditions.

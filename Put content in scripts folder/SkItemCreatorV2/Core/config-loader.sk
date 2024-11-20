@@ -1,3 +1,8 @@
+on async load:
+    locally suppress variable save warnings
+    locally suppress conjunction warnings
+    locally suppress starting expressions warnings
+
 #
 #MISC OPTIONS
 #
@@ -54,9 +59,26 @@ function SKICLoadConfig(itemload: string="ALL"):
         if {skitemcreator.main-config::rarity-options::placement} is not set:
             set {skitemcreator.main-config::rarity-options::placement} to "BOTTOM"
 
+        #Custom damage display
+        set {skitemcreator.main-config::custom-damage-display} to formatted yaml value "custom-damage-display" from "config"
+
+        #Conditions
+        loop yaml node keys "conditions" from "config":
+            set {_node::*} to "%loop-node%" split at "."
+            if {_node::2} is set:
+                set {_condition} to {_node::2}
+                add {_condition} to {skitemcreator.main-config::conditions::*}
+                set {skitemcreator.main-config::conditions::%{_condition}%::lore-display} to yaml value "conditions.%{_condition}%.lore-display" from "config"
+                set {skitemcreator.main-config::conditions::%{_condition}%::placeholder-type} to yaml value "conditions.%{_condition}%.check.placeholder-type" from "config"
+                set {skitemcreator.main-config::conditions::%{_condition}%::placeholder} to yaml value "conditions.%{_condition}%.check.placeholder" from "config"
+
+
+
+        #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
         #
         #Load items yml
         #
+        #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
         #Register all files
         unload yaml "config"
         set {_files::*} to SKICGetItemFilesPath("plugins/SkItemCreatorV2/items")
@@ -718,10 +740,40 @@ function SKICLoadPropertiesOfItem(file: string):
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         else if {_key} is "rarity":
             set string tag "SKIC-RARITY" of {skitemcreator.items.database::%{_filename}%::final-item} to yaml value "rarity" of {_yaml}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Custom damage
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        else if {_key} is "custom-damage":
+            set {_damage} to yaml value "custom-damage" from {_yaml}
+            set {_dmg::*} to "%{_damage}%" split by "~"
+            if {_dmg::2} is set:
+                set {skitemcreator.items.database::%{_filename}%::damage::max} to {_dmg::2} parsed as integer
+                set {skitemcreator.items.database::%{_filename}%::damage::min} to {_dmg::1} parsed as integer
+            else:
+                set {skitemcreator.items.database::%{_filename}%::damage} to "%{_damage}%" parsed as integer
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Conditions
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        else if {_key} is "conditions":
+            loop yaml node keys "conditions" from {_yaml}:
+                set {_node::*} to "%loop-node%" split at "."
+                if {_node::2} is set:
+                    set {_condition} to {_node::2}
+                    add {_condition} to {skitemcreator.items.database::%{_filename}%::conditions::*}
+                    set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::message} to formatted yaml value "conditions.%{_condition}%.message" from {_yaml}
+                    set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::comparator} to yaml value "conditions.%{_condition}%.comparator" from {_yaml}
+                    set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::value} to yaml value "conditions.%{_condition}%.value" from {_yaml}
+
+
         #
         #Unload yaml when everything is loaded
         #
         unload yaml {_yaml}
+
 
 
     #
