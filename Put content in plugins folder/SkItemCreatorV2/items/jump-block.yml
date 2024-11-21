@@ -1,0 +1,28 @@
+item:
+  type: VANILLA
+  value: LIME_GLAZED_TERRACOTTA
+
+name: "&a&lJump Block"
+
+lore:
+  - ""
+  - "&fMakes you jump upwards"
+  - "&fwhen you walk on it."
+
+#[OPTIONAL] If your item is a block, you can define custom parameters!
+custom-block:
+  self-drop: true
+  #[OPTIONAL]
+  clear-natural-drops: true
+  #[OPTIONAL]
+  immune-to-explosions: true
+  #[OPTIONAL]
+  skript:
+    1:
+      #Events can be PLACE, BREAK, WALK
+      event: WALK
+      #In ticks
+      cooldown: 20
+      execute:
+      - play sound "entity.ghast.shoot" at player
+      - push player upwards at speed 2

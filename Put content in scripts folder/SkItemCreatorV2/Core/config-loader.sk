@@ -1,870 +1,951 @@
 on async load:
-    locally suppress variable save warnings
-    locally suppress conjunction warnings
-    locally suppress starting expressions warnings
+	locally suppress variable save warnings
+	locally suppress conjunction warnings
+	locally suppress starting expressions warnings
 
 #
 #MISC OPTIONS
 #
 options:
-    #Plugin prefix
-    plugin-prefix: <##084CFB>[&lS<##2B47ED>&lk<##4F41DF>&lI<##723CD1>&lt<##9537C3>&le<##B832B5>&lm<##DC2CA7>&lC<##FF2799>&lr<##FA2A96>&le<##F42D92>&la<##EF308F>&lt<##E9348C>&lo<##E43789>&lr<##DE3A85>&lV<##D93D82>&l2]
+	#Plugin prefix
+	plugin-prefix: <##084CFB>[&lS<##2B47ED>&lk<##4F41DF>&lI<##723CD1>&lt<##9537C3>&le<##B832B5>&lm<##DC2CA7>&lC<##FF2799>&lr<##FA2A96>&le<##F42D92>&la<##EF308F>&lt<##E9348C>&lo<##E43789>&lr<##DE3A85>&lV<##D93D82>&l2]
 
 #
 #IMPORTS
 #DONT CHANGE THIS!!
 import:
-    java.io.File
-    java.io.FileReader
-    org.yaml.snakeyaml.Yaml
-    org.bukkit.Material
-    org.bukkit.inventory.ItemStack
+	java.io.File
+	java.io.FileReader
+	org.yaml.snakeyaml.Yaml
+	org.bukkit.Material
+	org.bukkit.inventory.ItemStack
 
 #Load everything when the server starts
 on load:
-    SKICLoadConfig("ALL")
+	SKICLoadConfig("ALL")
 
 function SKICLoadConfig(itemload: string="ALL"):
-    if yaml file "plugins/SkItemCreatorV2/config.yml" exists:
-        #Unload everything just to be sure
-        loop all of the currently loaded yaml files:
-            unload yaml loop-value-1
+	if yaml file "plugins/SkItemCreatorV2/config.yml" exists:
+		#Unload everything just to be sure
+		loop all of the currently loaded yaml files:
+			unload yaml loop-value-1
 
-        #Load config just one time. Prevent multi-loading when reloading all items.
-        set {_check-config-loaded} to 0
-        if {_check-config-loaded} = 0:
-            delete {skitemcreator.armor-sets::*}
-            delete {skitemcreator.main-config::*}
-            delete {skitemcreator.crafts::*}
-            #
-            #Load config
-            #
-            send "&d&l---------------------------------------" to console
-            send "{@plugin-prefix} &fLoading config..." to console
-            load yaml "plugins/SkItemCreatorV2/config.yml" as "config"
+		#Load config just one time. Prevent multi-loading when reloading all items.
+		set {_check-config-loaded} to 0
+		if {_check-config-loaded} = 0:
+			delete {skitemcreator.armor-sets::*}
+			delete {skitemcreator.main-config::*}
+			delete {skitemcreator.crafts::*}
+			#
+			#Load config
+			#
+			send "&d&l---------------------------------------" to console
+			send "{@plugin-prefix} &fLoading config..." to console
+			load yaml "plugins/SkItemCreatorV2/config.yml" as "config"
 
-        #
-        #config.yml
-        #
-        #Item rarities
-        loop yaml node keys "rarities" from "config":
-            set {_node::*} to "%loop-node%" split at "."
-            if {_node::2} is set:
-                add {_node::2} to {skitemcreator.main-config::rarities::*}
-                set {_display} to yaml value "%loop-node%.display" from "config"
-                set {skitemcreator.main-config::rarities::%{_node::2}%::display} to {_display}   
+		#
+		#config.yml
+		#
+		#Item rarities
+		loop yaml node keys "rarities" from "config":
+			set {_node::*} to "%loop-node%" split at "."
+			if {_node::2} is set:
+				add {_node::2} to {skitemcreator.main-config::rarities::*}
+				set {_display} to yaml value "%loop-node%.display" from "config"
+				set {skitemcreator.main-config::rarities::%{_node::2}%::display} to {_display}   
 
-        #Rarity options
-        set {skitemcreator.main-config::rarity-options::placement} to yaml value "rarity-options.placement" from "config"     
-        if {skitemcreator.main-config::rarity-options::placement} is not set:
-            set {skitemcreator.main-config::rarity-options::placement} to "BOTTOM"
+		#Rarity options
+		set {skitemcreator.main-config::rarity-options::placement} to yaml value "rarity-options.placement" from "config"     
+		if {skitemcreator.main-config::rarity-options::placement} is not set:
+			set {skitemcreator.main-config::rarity-options::placement} to "BOTTOM"
 
-        #Custom damage display
-        set {skitemcreator.main-config::custom-damage-display} to formatted yaml value "custom-damage-display" from "config"
+		#Custom damage display
+		set {skitemcreator.main-config::custom-damage-display} to formatted yaml value "custom-damage-display" from "config"
 
-        #Conditions
-        loop yaml node keys "conditions" from "config":
-            set {_node::*} to "%loop-node%" split at "."
-            if {_node::2} is set:
-                set {_condition} to {_node::2}
-                add {_condition} to {skitemcreator.main-config::conditions::*}
-                set {skitemcreator.main-config::conditions::%{_condition}%::lore-display} to yaml value "conditions.%{_condition}%.lore-display" from "config"
-                set {skitemcreator.main-config::conditions::%{_condition}%::placeholder-type} to yaml value "conditions.%{_condition}%.check.placeholder-type" from "config"
-                set {skitemcreator.main-config::conditions::%{_condition}%::placeholder} to yaml value "conditions.%{_condition}%.check.placeholder" from "config"
+		#Conditions
+		loop yaml node keys "conditions" from "config":
+			set {_node::*} to "%loop-node%" split at "."
+			if {_node::2} is set:
+				set {_condition} to {_node::2}
+				add {_condition} to {skitemcreator.main-config::conditions::*}
+				set {skitemcreator.main-config::conditions::%{_condition}%::lore-display} to yaml value "conditions.%{_condition}%.lore-display" from "config"
+				set {skitemcreator.main-config::conditions::%{_condition}%::placeholder-type} to yaml value "conditions.%{_condition}%.check.placeholder-type" from "config"
+				set {skitemcreator.main-config::conditions::%{_condition}%::placeholder} to yaml value "conditions.%{_condition}%.check.placeholder" from "config"
 
 
 
-        #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        #
-        #Load items yml
-        #
-        #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        #Register all files
-        unload yaml "config"
-        set {_files::*} to SKICGetItemFilesPath("plugins/SkItemCreatorV2/items")
-        if {_itemload} is "ALL":
-            #Delete everything before loading all files
-            delete {skitemcreator.items.database::*}
-            delete {skitemcreator.categories::*}
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		#
+		#Load items yml
+		#
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		#Register all files
+		unload yaml "config"
+		set {_files::*} to SKICGetItemFilesPath("plugins/SkItemCreatorV2/items")
+		if {_itemload} is "ALL":
+			#Delete everything before loading all files
+			delete {skitemcreator.items.database::*}
+			delete {skitemcreator.categories::*}
 
-        #    
-        #Create items
-        #
-        loop {_files::*}:
+		#    
+		#Create items
+		#
+		loop {_files::*}:
 
-            #Register filename
-            set {_file_name::*} to "%loop-value%" split by "/"
-            set {_file_name} to {_file_name::%size of {_file_name::*}%}
-            replace all ".yml" with "" in {_file_name}
-            #Delete data of the item if it's not reloading everything
-            if {_itemload} is not "ALL":
-                delete {skitemcreator.items.database::%{_file_name}%::final-item}
-                delete {skitemcreator.items.database::%{_file_name}%::*}
-                remove {_file_name} from {skitemcreator.items.database::*}
-            add {_file_name} to {skitemcreator.items.database::*}
+			#Register filename
+			set {_file_name::*} to "%loop-value%" split by "/"
+			set {_file_name} to {_file_name::%size of {_file_name::*}%}
+			replace all ".yml" with "" in {_file_name}
+			#Delete data of the item if it's not reloading everything
+			if {_itemload} is not "ALL":
+				delete {skitemcreator.items.database::%{_file_name}%::final-item}
+				delete {skitemcreator.items.database::%{_file_name}%::*}
+				remove {_file_name} from {skitemcreator.items.database::*}
+			add {_file_name} to {skitemcreator.items.database::*}
 
-            #Load properties
-            SKICLoadPropertiesOfItem("%loop-value%")
+			#Load properties
+			SKICLoadPropertiesOfItem("%loop-value%")
 
-        #Send how much items are loaded to console
-        set {_all-items::*} to {skitemcreator.imported-items.database::*} and {skitemcreator.items.database::*}
-        send "{@plugin-prefix} &e%size of {_all-items::*}% &fitems loaded!" to console
-        send "{@plugin-prefix}     &8- &e%size of {skitemcreator.imported-items.database::*}% &fimported" to console
-        send "{@plugin-prefix}     &8- &e%size of {skitemcreator.items.database::*}% &ffrom config" to console
+		#Send how much items are loaded to console
+		set {_all-items::*} to {skitemcreator.imported-items.database::*} and {skitemcreator.items.database::*}
+		send "{@plugin-prefix} &e%size of {_all-items::*}% &fitems loaded!" to console
+		send "{@plugin-prefix}     &8- &e%size of {skitemcreator.imported-items.database::*}% &fimported" to console
+		send "{@plugin-prefix}     &8- &e%size of {skitemcreator.items.database::*}% &ffrom config" to console
 
-        #Load armor sets
-        SKICLoadArmorSets()
+		#Load armor sets
+		SKICLoadArmorSets()
 
-        #Load crafts
-        SKICLoadCrafts()
+		#Load crafts
+		SKICLoadCrafts()
 
-        #Load kits
-        SKICLoadKits()
+		#Load kits
+		SKICLoadKits()
 
-        send "&d&l---------------------------------------" to console
+		send "&d&l---------------------------------------" to console
 
 
 #
 #Function for returning ALL files in a folder (this will load files in folder and sub-folders.)
 #
 function SKICGetItemFilesPath(path: string) :: objects:
-    set {_t} to new File({_path})
-    loop ...{_t}.listFiles():
-        if loop-value.isDirectory():
-            add SKICGetItemFilesPath("%loop-value%") to {_list::*}
-        else:
-            add loop-value to {_list::*}
-    return {_list::*}
+	set {_t} to new File({_path})
+	loop ...{_t}.listFiles():
+		if loop-value.isDirectory():
+			add SKICGetItemFilesPath("%loop-value%") to {_list::*}
+		else:
+			add loop-value to {_list::*}
+	return {_list::*}
 
 #
 #Load all properties of the item yaml
 #
 function SKICLoadPropertiesOfItem(file: string):
 
-    set {_file} to new File({_file})
-    load yaml "%{_file}%" as {_yaml}
-    set {_yaml} to new Yaml()
-    set {_fileReader} to new FileReader({_file})    
-    set {_data} to {_yaml}.load({_fileReader})
-    {_fileReader}.close()
-    set {_filename::*} to "%{_file}%" split by "/"
-    set {_filename} to last element of {_filename::*}
-    replace all ".yml" with "" in {_filename}
-    set {_keys::*} to ...{_data}.keySet()
-    #Order keys to load item
-    loop {_keys::*}:
-        if loop-value is "item":
-            add loop-value to {_keys-priority::*}
-        else:
-            add loop-value to {_keys-low-priority::*}
-    set {_final-keys::*} to {_keys-priority::*} and {_keys-low-priority::*}
-    loop {_final-keys::*}:
-        set {_key} to "%loop-value%"
+	set {_file} to new File({_file})
+	load yaml "%{_file}%" as {_yaml}
+	set {_yaml} to new Yaml()
+	set {_fileReader} to new FileReader({_file})    
+	set {_data} to {_yaml}.load({_fileReader})
+	{_fileReader}.close()
+	set {_filename::*} to "%{_file}%" split by "/"
+	set {_filename} to last element of {_filename::*}
+	replace all ".yml" with "" in {_filename}
+	set {_keys::*} to ...{_data}.keySet()
+	#Order keys to load item
+	loop {_keys::*}:
+		if loop-value is "item":
+			add loop-value to {_keys-priority::*}
+		else:
+			add loop-value to {_keys-low-priority::*}
+	set {_final-keys::*} to {_keys-priority::*} and {_keys-low-priority::*}
+	loop {_final-keys::*}:
+		set {_key} to "%loop-value%"
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Type of item
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if {_key} is "item":   
-            #If Item is VANILLA
-            set {_item-value} to yaml value "item.value" from {_file}
-            if yaml value "item.type" from {_yaml} is "VANILLA":
-                set {_item-material} to Material.getMaterial({_item-value})
-                if {_item-material} is set:
-                    set {_i} to new ItemStack({_item-material})
-                    set {skitemcreator.items.database::%{_filename}%::final-item} to {_i}
-            #Else if Item is VARIABLE
-            else if yaml value "item.type" from {_yaml} is "VARIABLE":
-                set {skitemcreator.items.database::%{_filename}%::final-item} to {%{_item-value}%}
-            #Else if Item is ITEMSADDER (Needs ItemsAdder)
-            else if yaml value "item.type" from {_yaml} is "ITEMSADDER":
-                parse if plugin "ItemsAdder" is enabled:
-                    set {_itemsadder.customstack.class} to class "dev.lone.itemsadder.api.CustomStack"
-                    set {_itemsadder.itemsadder.class} to class "dev.lone.itemsadder.api.ItemsAdder"
-                    set {_instance} to {_itemsadder.customstack.class}.getInstance({_item-value})
-                    set {skitemcreator.items.database::%{_filename}%::final-item} to {_instance}.getItemStack()
-            #Else if Item is ORAXEN (Needs Oraxen) DOES NOT WORK YET BECAUSE OF ORAXEN OR SKRIPT (Something is broken)
-            else if yaml value "item.type" from {_yaml} is "ORAXEN":
-                parse if plugin "Oraxen" is enabled:
-                    set {_oraxen.items.class} to class "io.th0rgal.oraxen.api.OraxenItems"
-                    set {_oraxen.itembuilder.class} to class "io.th0rgal.oraxen.items.ItemBuilder"
-                    if {_oraxen.items.class}.exists({_item-value}):
-                        set {_i} to {_oraxen.items.class}.getItemById({_item-value})
-                        set {_build} to {_i}.build()
-                        set {skitemcreator.items.database::%{_filename}%::final-item} to {_build}
-            #Else if Item is MYTHICMOBS/CRUCIBLE (Needs MythicMobs)
-            else if yaml value "item.type" from {_yaml} is "MYTHICMOBS" or "CRUCIBLE":
-                parse if plugin "MythicMobs" is enabled:
-                    set {_class.mythicmobs.Mythic-mobs} to class "io.lumine.xikage.mythicmobs.MythicMobs"
-                    set {_class.mythicmobs.Item-Manager} to class "io.lumine.xikage.mythicmobs.items.ItemManager"
-                    set {_class.mythicmobs.Mythic-Item} to class "io.lumine.xikage.mythicmobs.items.MythicItem"
-                    set {_instance} to instance of plugin "MythicMobs"
-                    set {_item-manager} to {_instance}.getItemManager()
-                    set {_mmitem} to {_item-manager}.getItem({_item-value})
-                    set {_mmitem-final} to {_mmitem}.get()
-                    set {_mmitem-final2} to {_mmitem-final}.generateItemStack(1)
-                    set {skitemcreator.items.database::%{_filename}%::final-item} to {_mmitem-final2}.getItemStack()
-            #Save Item's ID in its NBT
-            set {_nbt} to custom nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-            set string tag "SKIC-INTERNAL-NAME" of {_nbt} to {_filename}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Type of item
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		if {_key} is "item":   
+			#If Item is VANILLA
+			set {_item-value} to yaml value "item.value" from {_file}
+			if yaml value "item.type" from {_yaml} is "VANILLA":
+				set {_item-material} to Material.getMaterial({_item-value})
+				if {_item-material} is set:
+					set {_i} to new ItemStack({_item-material})
+					set {skitemcreator.items.database::%{_filename}%::final-item} to {_i}
+			#Else if Item is VARIABLE
+			else if yaml value "item.type" from {_yaml} is "VARIABLE":
+				set {skitemcreator.items.database::%{_filename}%::final-item} to {%{_item-value}%}
+			#Else if Item is ITEMSADDER (Needs ItemsAdder)
+			else if yaml value "item.type" from {_yaml} is "ITEMSADDER":
+				parse if plugin "ItemsAdder" is enabled:
+					set {_itemsadder.customstack.class} to class "dev.lone.itemsadder.api.CustomStack"
+					set {_itemsadder.itemsadder.class} to class "dev.lone.itemsadder.api.ItemsAdder"
+					set {_instance} to {_itemsadder.customstack.class}.getInstance({_item-value})
+					set {skitemcreator.items.database::%{_filename}%::final-item} to {_instance}.getItemStack()
+			#Else if Item is ORAXEN (Needs Oraxen) DOES NOT WORK YET BECAUSE OF ORAXEN OR SKRIPT (Something is broken)
+			else if yaml value "item.type" from {_yaml} is "ORAXEN":
+				parse if plugin "Oraxen" is enabled:
+					set {_oraxen.items.class} to class "io.th0rgal.oraxen.api.OraxenItems"
+					set {_oraxen.itembuilder.class} to class "io.th0rgal.oraxen.items.ItemBuilder"
+					if {_oraxen.items.class}.exists({_item-value}):
+						set {_i} to {_oraxen.items.class}.getItemById({_item-value})
+						set {_build} to {_i}.build()
+						set {skitemcreator.items.database::%{_filename}%::final-item} to {_build}
+			#Else if Item is MYTHICMOBS/CRUCIBLE (Needs MythicMobs)
+			else if yaml value "item.type" from {_yaml} is "MYTHICMOBS" or "CRUCIBLE":
+				parse if plugin "MythicMobs" is enabled:
+					set {_class.mythicmobs.Mythic-mobs} to class "io.lumine.xikage.mythicmobs.MythicMobs"
+					set {_class.mythicmobs.Item-Manager} to class "io.lumine.xikage.mythicmobs.items.ItemManager"
+					set {_class.mythicmobs.Mythic-Item} to class "io.lumine.xikage.mythicmobs.items.MythicItem"
+					set {_instance} to instance of plugin "MythicMobs"
+					set {_item-manager} to {_instance}.getItemManager()
+					set {_mmitem} to {_item-manager}.getItem({_item-value})
+					set {_mmitem-final} to {_mmitem}.get()
+					set {_mmitem-final2} to {_mmitem-final}.generateItemStack(1)
+					set {skitemcreator.items.database::%{_filename}%::final-item} to {_mmitem-final2}.getItemStack()
+			#Save Item's ID in its NBT
+			set {_nbt} to custom nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+			set string tag "SKIC-INTERNAL-NAME" of {_nbt} to {_filename}
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Custom name
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "name":
-            set name of {skitemcreator.items.database::%{_filename}%::final-item} to formatted yaml value "name" from {_yaml}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Lore
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "lore":
-            set lore of {skitemcreator.items.database::%{_filename}%::final-item} to formatted yaml list "lore" from {_yaml}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Item category
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "item-category":
-            set {skitemcreator.items.database::%{_filename}%::item-category} to yaml value "item-category" from {_yaml}
-            if {skitemcreator.categories::*} does not contain {_item-category}:
-                add (yaml value "item-category" from {_yaml}) to {skitemcreator.categories::*}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Attributes
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "attributes":
-            set {_n} to empty nbt compound
-            set {_attributes} to compound tag "minecraft:attribute_modifiers" of {_n}
-            set {_loop} to 1
-            loop yaml node keys "attributes" from {_yaml}:
-                set {_node::*} to "%loop-node%" split at "."
-                if {_node::2} is set:
-                    set {_modifier::%{_loop}%} to empty nbt compound
-                    set {_attribute-name} to yaml value "attributes.%{_node::2}%.name" from {_yaml}
-                    set {_attribute-operation} to yaml value "attributes.%{_node::2}%.operation" from {_yaml}
-                    set {_attribute-amount} to yaml value "attributes.%{_node::2}%.amount" from {_yaml}
-                    set {_attribute-slot} to yaml value "attributes.%{_node::2}%.slot" from {_yaml}
-                    set {_attribute-show-in-tooltip} to yaml value "attributes.%{_node::2}%.show-in-tooltip" from {_yaml}
-                    if {_attribute-operation} is not set:
-                        set {_attribute-operation} to "add_value"
-                    if {_attribute-amount} is not set:
-                        set {_attribute-amount} to 1
-                    if {_attribute-slot} is not set:
-                        set {_attribute-slot} to "any"
-                    if {_attribute-show-in-tooltip} is not set:
-                        set {_attribute-show-in-tooltip} to true 
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Custom name
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "name":
+			set name of {skitemcreator.items.database::%{_filename}%::final-item} to formatted yaml value "name" from {_yaml}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Lore
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "lore":
+			set lore of {skitemcreator.items.database::%{_filename}%::final-item} to formatted yaml list "lore" from {_yaml}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Item category
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "item-category":
+			set {skitemcreator.items.database::%{_filename}%::item-category} to yaml value "item-category" from {_yaml}
+			if {skitemcreator.categories::*} does not contain {_item-category}:
+				add (yaml value "item-category" from {_yaml}) to {skitemcreator.categories::*}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Attributes
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "attributes":
+			set {_n} to empty nbt compound
+			set {_attributes} to compound tag "minecraft:attribute_modifiers" of {_n}
+			set {_loop} to 1
+			loop yaml node keys "attributes" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::2} is set:
+					set {_modifier::%{_loop}%} to empty nbt compound
+					set {_attribute-name} to yaml value "attributes.%{_node::2}%.name" from {_yaml}
+					set {_attribute-operation} to yaml value "attributes.%{_node::2}%.operation" from {_yaml}
+					set {_attribute-amount} to yaml value "attributes.%{_node::2}%.amount" from {_yaml}
+					set {_attribute-slot} to yaml value "attributes.%{_node::2}%.slot" from {_yaml}
+					set {_attribute-show-in-tooltip} to yaml value "attributes.%{_node::2}%.show-in-tooltip" from {_yaml}
+					if {_attribute-operation} is not set:
+						set {_attribute-operation} to "add_value"
+					if {_attribute-amount} is not set:
+						set {_attribute-amount} to 1
+					if {_attribute-slot} is not set:
+						set {_attribute-slot} to "any"
+					if {_attribute-show-in-tooltip} is not set:
+						set {_attribute-show-in-tooltip} to true 
 
-                    if {_attribute-show-in-tooltip} is true:
-                        set {_byte} to 1
-                    else:
-                        set {_byte} to 0
-                    set string tag "id" of {_modifier::%{_loop}%} to {_attribute-name}
-                    set string tag "type" of {_modifier::%{_loop}%} to {_attribute-name}
-                    set double tag "amount" of {_modifier::%{_loop}%} to {_attribute-amount}
-                    set string tag "operation" of {_modifier::%{_loop}%} to {_attribute-operation}
-                    set string tag "slot" of {_modifier::%{_loop}%} to {_attribute-slot}
-                    add 1 to {_loop}
+					if {_attribute-show-in-tooltip} is true:
+						set {_byte} to 1
+					else:
+						set {_byte} to 0
+					set string tag "id" of {_modifier::%{_loop}%} to {_attribute-name}
+					set string tag "type" of {_modifier::%{_loop}%} to {_attribute-name}
+					set double tag "amount" of {_modifier::%{_loop}%} to {_attribute-amount}
+					set string tag "operation" of {_modifier::%{_loop}%} to {_attribute-operation}
+					set string tag "slot" of {_modifier::%{_loop}%} to {_attribute-slot}
+					add 1 to {_loop}
 
-            set compound list tag "modifiers" of {_attributes} to {_modifier::*}
-            set byte tag "show_in_tooltip" of {_attributes} to {_byte}
+			set compound list tag "modifiers" of {_attributes} to {_modifier::*}
+			set byte tag "show_in_tooltip" of {_attributes} to {_byte}
 
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Custom NBT
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "custom-nbt":
-            loop yaml node keys "custom-nbt" from {_yaml}:
-                set {_node::*} to "%loop-node%" split at "."
-                if {_node::2} is set:
-                    set {_custom-nbt-name} to yaml value "custom-nbt.%{_node::2}%.name" from {_yaml}
-                    set {_custom-nbt-type} to yaml value "custom-nbt.%{_node::2}%.type" from {_yaml}
-                    set {_custom-nbt-value} to yaml value "custom-nbt.%{_node::2}%.value" from {_yaml}
-                    if {_custom-nbt-type} is not set:
-                        set {_custom-nbt-type} to "STRING"
-                    if {_custom-nbt-value} is not set:
-                        set {_custom-nbt-value} to "test"
-                    #Apply tag
-                    if {_custom-nbt-type} is "STRING":
-                        set string tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
-                    else if {_custom-nbt-type} is "INTEGER":
-                        set int tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
-                    else if {_custom-nbt-type} is "FLOAT":
-                        set float tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
-                    else if {_custom-nbt-type} is "BYTE":
-                        set byte tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
-                    else if {_custom-nbt-type} is "LONG":
-                        set long tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
-                    else if {_custom-nbt-type} is "SHORT":
-                        set short tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Color
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "color":
-            set {_color} to yaml value "color.decimal" from {_yaml}
-            set {_show-in-tooltip} to yaml value "color.show-in-tooltip" from {_yaml}
-            if {_show-in-tooltip} is not set:
-                set {_show-in-tooltip} to true
-            add nbt from "{""minecraft:dyed_color"":{rgb:%{_color}%,show_in_tooltip:%{_show-in-tooltip}%}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Trim
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "trim":
-            set {_trim-material} to yaml value "trim.material" from {_yaml}
-            set {_trim-pattern} to yaml value "trim.pattern" from {_yaml}
-            set {_show-in-tooltip} to yaml value "trim.show-in-tooltip" from {_yaml}
-            if {_show-in-tooltip} is not set:
-                set {_show-in-tooltip} to false
-            add nbt of "{""minecraft:trim"":{material:""minecraft:%lowercase {_trim-material}%"",pattern:""minecraft:%lowercase {_trim-pattern}%"",show_in_tooltip:%{_show-in-tooltip}%}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Glint
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "glint":
-            if yaml value "glint" from {_yaml} is true:
-                add nbt from "{""minecraft:enchantment_glint_override"":1b}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-            else:
-                add nbt from "{""minecraft:enchantment_glint_override"":0b}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Equippable 
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "equippable":
-            # Slot
-            set {_slot} to yaml value "equippable.slot" from {_yaml}            
-            # Equip Sound
-            set {_equip-sound} to yaml value "equippable.equip-sound" from {_yaml}
-            if {_equip-sound} is not set:
-                set {_equip-sound} to "minecraft:item.armor.equip_generic"            
-            # Model
-            set {_model} to yaml value "equippable.model" from {_yaml}            
-            # Dispensable
-            set {_dispensable} to yaml value "equippable.dispensable" from {_yaml}
-            if {_dispensable} is not set:
-                set {_dispensable} to true            
-            # Swappable
-            set {_swappable} to yaml value "equippable.swappable" from {_yaml}
-            if {_swappable} is not set:
-                set {_swappable} to true            
-            # Damage on Hurt
-            set {_damage-on-hurt} to yaml value "equippable.damage-on-hurt" from {_yaml}
-            if {_damage-on-hurt} is not set:
-                set {_damage-on-hurt} to false            
-            # Camera Overlay
-            set {_camera-overlay} to yaml value "equippable.camera-overlay" from {_yaml}
-            set {_n} to empty nbt compound
-            set {_equippable} to compound tag "minecraft:equippable" of {_n}
-            set string tag "slot" of {_equippable} to {_slot}
-            set string tag "equip_sound" of {_equippable} to {_equip-sound}
-            if {_model} is set:
-                set string tag "model" of {_equippable} to {_model}
-            #
-            if {_dispensable} is true:
-                set {_dispensable_byte} to 1
-            else:
-                set {_dispensable_byte} to 0
-            if {_swappable} is true:
-                set {_swappable_byte} to 1
-            else:
-                set {_swappable_byte} to 0
-            if {_damage-on-hurt} is true:
-                set {_damage-on-hurt_byte} to 1
-            else:
-                set {_damage-on-hurt_byte} to 0  
-            set byte tag "dispensable" of {_equippable} to {_dispensable_byte}       
-            set byte tag "swappable" of {_equippable} to {_swappable_byte}       
-            set byte tag "damage-on-hurt" of {_equippable} to {_damage-on-hurt_byte}      
-            if {_camera-overlay} is set:
-                set string tag "camera_overlay" of {_equippable} to {_camera-overlay}
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Hide Tooltip
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "hide-tooltip":
-            set {_hide-tooltip} to yaml value "hide-dditional-tooltip" from {_yaml}
-            if {_hide-tooltip} is true:
-                add nbt from "{""minecraft:hide_tooltip"":{}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Hide Addtional Tooltip
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "hide-additional-tooltip":
-            set {_hide-tooltip} to yaml value "hide-additional-tooltip" from {_yaml}
-            if {_hide-tooltip} is true:
-                add nbt from "{""minecraft:hide_additional_tooltip"":{}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Custom NBT
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "custom-nbt":
+			loop yaml node keys "custom-nbt" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::2} is set:
+					set {_custom-nbt-name} to yaml value "custom-nbt.%{_node::2}%.name" from {_yaml}
+					set {_custom-nbt-type} to yaml value "custom-nbt.%{_node::2}%.type" from {_yaml}
+					set {_custom-nbt-value} to yaml value "custom-nbt.%{_node::2}%.value" from {_yaml}
+					if {_custom-nbt-type} is not set:
+						set {_custom-nbt-type} to "STRING"
+					if {_custom-nbt-value} is not set:
+						set {_custom-nbt-value} to "test"
+					#Apply tag
+					if {_custom-nbt-type} is "STRING":
+						set string tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
+					else if {_custom-nbt-type} is "INTEGER":
+						set int tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
+					else if {_custom-nbt-type} is "FLOAT":
+						set float tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
+					else if {_custom-nbt-type} is "BYTE":
+						set byte tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
+					else if {_custom-nbt-type} is "LONG":
+						set long tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
+					else if {_custom-nbt-type} is "SHORT":
+						set short tag {_custom-nbt-name} of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_custom-nbt-value}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Color
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "color":
+			set {_color} to yaml value "color.decimal" from {_yaml}
+			set {_show-in-tooltip} to yaml value "color.show-in-tooltip" from {_yaml}
+			if {_show-in-tooltip} is not set:
+				set {_show-in-tooltip} to true
+			add nbt from "{""minecraft:dyed_color"":{rgb:%{_color}%,show_in_tooltip:%{_show-in-tooltip}%}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Trim
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "trim":
+			set {_trim-material} to yaml value "trim.material" from {_yaml}
+			set {_trim-pattern} to yaml value "trim.pattern" from {_yaml}
+			set {_show-in-tooltip} to yaml value "trim.show-in-tooltip" from {_yaml}
+			if {_show-in-tooltip} is not set:
+				set {_show-in-tooltip} to false
+			add nbt of "{""minecraft:trim"":{material:""minecraft:%lowercase {_trim-material}%"",pattern:""minecraft:%lowercase {_trim-pattern}%"",show_in_tooltip:%{_show-in-tooltip}%}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Glint
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "glint":
+			if yaml value "glint" from {_yaml} is true:
+				add nbt from "{""minecraft:enchantment_glint_override"":1b}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+			else:
+				add nbt from "{""minecraft:enchantment_glint_override"":0b}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Equippable 
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "equippable":
+			# Slot
+			set {_slot} to yaml value "equippable.slot" from {_yaml}            
+			# Equip Sound
+			set {_equip-sound} to yaml value "equippable.equip-sound" from {_yaml}
+			if {_equip-sound} is not set:
+				set {_equip-sound} to "minecraft:item.armor.equip_generic"            
+			# Model
+			set {_model} to yaml value "equippable.model" from {_yaml}            
+			# Dispensable
+			set {_dispensable} to yaml value "equippable.dispensable" from {_yaml}
+			if {_dispensable} is not set:
+				set {_dispensable} to true            
+			# Swappable
+			set {_swappable} to yaml value "equippable.swappable" from {_yaml}
+			if {_swappable} is not set:
+				set {_swappable} to true            
+			# Damage on Hurt
+			set {_damage-on-hurt} to yaml value "equippable.damage-on-hurt" from {_yaml}
+			if {_damage-on-hurt} is not set:
+				set {_damage-on-hurt} to false            
+			# Camera Overlay
+			set {_camera-overlay} to yaml value "equippable.camera-overlay" from {_yaml}
+			set {_n} to empty nbt compound
+			set {_equippable} to compound tag "minecraft:equippable" of {_n}
+			set string tag "slot" of {_equippable} to {_slot}
+			set string tag "equip_sound" of {_equippable} to {_equip-sound}
+			if {_model} is set:
+				set string tag "model" of {_equippable} to {_model}
+			#
+			if {_dispensable} is true:
+				set {_dispensable_byte} to 1
+			else:
+				set {_dispensable_byte} to 0
+			if {_swappable} is true:
+				set {_swappable_byte} to 1
+			else:
+				set {_swappable_byte} to 0
+			if {_damage-on-hurt} is true:
+				set {_damage-on-hurt_byte} to 1
+			else:
+				set {_damage-on-hurt_byte} to 0  
+			set byte tag "dispensable" of {_equippable} to {_dispensable_byte}       
+			set byte tag "swappable" of {_equippable} to {_swappable_byte}       
+			set byte tag "damage-on-hurt" of {_equippable} to {_damage-on-hurt_byte}      
+			if {_camera-overlay} is set:
+				set string tag "camera_overlay" of {_equippable} to {_camera-overlay}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Hide Tooltip
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "hide-tooltip":
+			set {_hide-tooltip} to yaml value "hide-dditional-tooltip" from {_yaml}
+			if {_hide-tooltip} is true:
+				add nbt from "{""minecraft:hide_tooltip"":{}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Hide Addtional Tooltip
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "hide-additional-tooltip":
+			set {_hide-tooltip} to yaml value "hide-additional-tooltip" from {_yaml}
+			if {_hide-tooltip} is true:
+				add nbt from "{""minecraft:hide_additional_tooltip"":{}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Max stack size
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "max-stack-size":
-            set {_max-stack-size} to yaml value "max-stack-size" from {_yaml}
-            add nbt from "{""minecraft:max_stack_size"":%{_max-stack-size}%}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Unbreakable
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "unbreakable":
-            set {_unbreakable} to yaml value "unbreakable.value" from {_yaml}
-            if {_unbreakable} is not set:
-                set {_unbreakable} to true
-            
-            set {_show-in-tooltip} to yaml value "unbreakable.show-in-tooltip" from {_yaml}
-            if {_show-in-tooltip} is not set:
-                set {_show-in-tooltip} to true
-            add nbt from "{""minecraft:unbreakable"":{show_in_tooltip:%{_show-in-tooltip}%}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Skull Skin
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "skull-skin":
-            set {_skull_skin} to yaml value "skull-skin" from {_yaml}
-            add nbt from "{""minecraft:profile"":{id:[I;1012646827,1820739582,-1120930980,-1600539797],name:"""",properties:[{name:""textures"",value:""%{_skull_skin}%""}]}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Recipes
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "recipes":
-            set {_recipes::*} to yaml list "recipes" from {_yaml}
-            set string list tag "minecraft:recipes" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_recipes::*}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Stored enchantments
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "stored-enchantments":
-            set {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-            set {_stored-enchants} to compound tag "minecraft:stored_enchantments" of {_n}
-            loop yaml node keys "stored-enchantments" from {_yaml}:
-                set {_node::*} to "%loop-node%" split at "."
-                if {_node::2} is set:
-                    set {_enchant-name} to yaml value "stored-enchantments.%{_node::2}%.name" from {_yaml}
-                    set {_enchant-level} to yaml value "stored-enchantments.%{_node::2}%.level" from {_yaml}
-                    set {_levels::%{_loop}%} to empty nbt compound
-                    set int tag {_enchant-name} of {_stored-enchants} to {_enchant-level}
-            set compound tag "minecraft:stored_enchantments" of {_n} to {_stored-enchants}
-            set {skitemcreator.items.database::%{_filename}%::final-item} to {skitemcreator.items.database::%{_filename}%::final-item} with nbt {_n}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Food
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "food":
-            set {_n} to empty nbt compound
-            set {_food} to compound tag "minecraft:food" of {_n}
-            set {_nutrition} to yaml value "food.nutrition" from {_yaml}
-            set {_saturation} to yaml value "food.saturation" from {_yaml}
-            set {_can-always-eat} to yaml value "food.can-always-eat" from {_yaml}
-            if {_can-always-eat} is not set:
-                set {_can-always-eat} to false
-            set int tag "nutrition" of {_food} to {_nutrition}
-            set float tag "saturation" of {_food} to {_saturation}
-            if {_can-always-eat} is false:
-                set {_boolean} to 0
-            else:
-                set {_boolean} to 1
-            set byte tag "can_always_eat" of {_food} to {_boolean}
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Tool
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "tool":
-            set {_n2} to empty nbt compound
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Max stack size
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "max-stack-size":
+			set {_max-stack-size} to yaml value "max-stack-size" from {_yaml}
+			add nbt from "{""minecraft:max_stack_size"":%{_max-stack-size}%}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Unbreakable
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "unbreakable":
+			set {_unbreakable} to yaml value "unbreakable.value" from {_yaml}
+			if {_unbreakable} is not set:
+				set {_unbreakable} to true
+			
+			set {_show-in-tooltip} to yaml value "unbreakable.show-in-tooltip" from {_yaml}
+			if {_show-in-tooltip} is not set:
+				set {_show-in-tooltip} to true
+			add nbt from "{""minecraft:unbreakable"":{show_in_tooltip:%{_show-in-tooltip}%}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Skull Skin
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "skull-skin":
+			set {_skull_skin} to yaml value "skull-skin" from {_yaml}
+			add nbt from "{""minecraft:profile"":{id:[I;1012646827,1820739582,-1120930980,-1600539797],name:"""",properties:[{name:""textures"",value:""%{_skull_skin}%""}]}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Recipes
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "recipes":
+			set {_recipes::*} to yaml list "recipes" from {_yaml}
+			set string list tag "minecraft:recipes" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_recipes::*}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Stored enchantments
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "stored-enchantments":
+			set {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+			set {_stored-enchants} to compound tag "minecraft:stored_enchantments" of {_n}
+			loop yaml node keys "stored-enchantments" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::2} is set:
+					set {_enchant-name} to yaml value "stored-enchantments.%{_node::2}%.name" from {_yaml}
+					set {_enchant-level} to yaml value "stored-enchantments.%{_node::2}%.level" from {_yaml}
+					set {_levels::%{_loop}%} to empty nbt compound
+					set int tag {_enchant-name} of {_stored-enchants} to {_enchant-level}
+			set compound tag "minecraft:stored_enchantments" of {_n} to {_stored-enchants}
+			set {skitemcreator.items.database::%{_filename}%::final-item} to {skitemcreator.items.database::%{_filename}%::final-item} with nbt {_n}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Food
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "food":
+			set {_n} to empty nbt compound
+			set {_food} to compound tag "minecraft:food" of {_n}
+			set {_nutrition} to yaml value "food.nutrition" from {_yaml}
+			set {_saturation} to yaml value "food.saturation" from {_yaml}
+			set {_can-always-eat} to yaml value "food.can-always-eat" from {_yaml}
+			if {_can-always-eat} is not set:
+				set {_can-always-eat} to false
+			set int tag "nutrition" of {_food} to {_nutrition}
+			set float tag "saturation" of {_food} to {_saturation}
+			if {_can-always-eat} is false:
+				set {_boolean} to 0
+			else:
+				set {_boolean} to 1
+			set byte tag "can_always_eat" of {_food} to {_boolean}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Tool
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "tool":
+			set {_n2} to empty nbt compound
 
-            set {_tool-compound} to compound tag "minecraft:tool" of {_n2}
-            set {_damage-per-block} to yaml value "tool.damage-per-block" from {_yaml}
-            set int tag "damage_per_block" of {_tool-compound} to {_damage-per-block}
-            set {_default-mining-speed} to yaml value "tool.default-mining-speed" from {_yaml}
-            set float tag "default_mining_speed" of {_tool-compound} to {_default-mining-speed}
+			set {_tool-compound} to compound tag "minecraft:tool" of {_n2}
+			set {_damage-per-block} to yaml value "tool.damage-per-block" from {_yaml}
+			set int tag "damage_per_block" of {_tool-compound} to {_damage-per-block}
+			set {_default-mining-speed} to yaml value "tool.default-mining-speed" from {_yaml}
+			set float tag "default_mining_speed" of {_tool-compound} to {_default-mining-speed}
 
-            set {_loop} to 1
-            set {_rules::1} to empty nbt compound
-            loop yaml node keys "tool.rules" from {_yaml}:
-                set {_node::*} to "%loop-node%" split at "."
-                if {_node::3} is set:
-                    set {_rules::%{_loop}%} to empty nbt compound
-                    set {_blocks::*} to yaml list "tool.rules.%{_node::3}%.blocks" from {_yaml}
-                    set {_correct-for-drops} to yaml value "tool.rules.%{_node::3}%.correct-for-drops" from {_yaml}
-                    set {_speed} to yaml value "tool.rules.%{_node::3}%.speed" from {_yaml}
-                    set string list tag "blocks" of {_rules::%{_loop}%} to {_blocks::*}
-                    if {_correct-for-drops} is true:
-                        set byte tag "correct_for_drops" of {_rules::%{_loop}%} to 1
-                    else:
-                        set byte tag "correct_for_drops" of {_rules::%{_loop}%} to 0
-                    set float tag "speed" of {_rules::%{_loop}%} to {_speed}
-                    add 1 to {_loop}
+			set {_loop} to 1
+			set {_rules::1} to empty nbt compound
+			loop yaml node keys "tool.rules" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::3} is set:
+					set {_rules::%{_loop}%} to empty nbt compound
+					set {_blocks::*} to yaml list "tool.rules.%{_node::3}%.blocks" from {_yaml}
+					set {_correct-for-drops} to yaml value "tool.rules.%{_node::3}%.correct-for-drops" from {_yaml}
+					set {_speed} to yaml value "tool.rules.%{_node::3}%.speed" from {_yaml}
+					set string list tag "blocks" of {_rules::%{_loop}%} to {_blocks::*}
+					if {_correct-for-drops} is true:
+						set byte tag "correct_for_drops" of {_rules::%{_loop}%} to 1
+					else:
+						set byte tag "correct_for_drops" of {_rules::%{_loop}%} to 0
+					set float tag "speed" of {_rules::%{_loop}%} to {_speed}
+					add 1 to {_loop}
 
-            set compound list tag "rules" of {_tool-compound} to {_rules::*} 
+			set compound list tag "rules" of {_tool-compound} to {_rules::*} 
 
-            set {_damage} to yaml value "tool.damage" from {_yaml}
-            set int tag "minecraft:damage" of {_n2} to {_damage}
-            set {_max-stack-size} to yaml value "tool.max-stack-size" from {_yaml}
-            set int tag "minecraft:max_stack_size" of {_n2} to {_max-stack-size}
-            set {_max-damage} to yaml value "tool.max-damage" from {_yaml}
-            set int tag "minecraft:max_damage" of {_n2} to {_max-damage}
+			set {_damage} to yaml value "tool.damage" from {_yaml}
+			set int tag "minecraft:damage" of {_n2} to {_damage}
+			set {_max-stack-size} to yaml value "tool.max-stack-size" from {_yaml}
+			set int tag "minecraft:max_stack_size" of {_n2} to {_max-stack-size}
+			set {_max-damage} to yaml value "tool.max-damage" from {_yaml}
+			set int tag "minecraft:max_damage" of {_n2} to {_max-damage}
 
-            add nbt from {_n2} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+			add nbt from {_n2} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Repair cost
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "repair-cost":
-            set {_repair-cost} to yaml value "repair-cost" from {_yaml}
-            set int tag "minecraft:repair_cost" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_repair-cost}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Use cooldown (Coming for 1.21.3)
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "use-cooldown":
-            set {_n} to empty nbt compound
-            set {_seconds} to yaml value "use-cooldown.seconds" from {_yaml}
-            set {_group} to yaml value "use-cooldown.group" from {_yaml}
-            set {_use-cooldown-tag} to compound tag "minecraft:use_cooldown" of {_n}
-            set int tag "seconds" of {_use-cooldown-tag} to {_seconds}
-            set string tag "cooldown_group" of {_use-cooldown-tag} to {_group}
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Item model
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "item-model":
-            set {_model} to yaml value "item-model" from {_yaml}
-            set string tag "minecraft:item_model" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_model}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Max damage
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "max-damage":
-            set {_dmg} to yaml value "max-damage" from {_yaml}
-            set int tag "minecraft:max_damage" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_dmg}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Potion contents
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "potion":
-            set {_n} to empty nbt compound
-            set {_potion_content} to compound tag "minecraft:potion_contents" of {_n}
-            set {_potion} to yaml value "potion.id" from {_yaml}
-            set {_color} to yaml value "potion.custom-color" from {_yaml}
-            set {_loop} to 1
-            loop yaml node keys "potion.effects" from {_yaml}:
-                set {_node::*} to "%loop-node%" split at "."
-                if {_node::3} is set:
-                    set {_id} to yaml value "potion.effects.%{_node::3}%.id" from {_yaml}
-                    set {_amplifier} to yaml value "potion.effects.%{_node::3}%.amplifier" from {_yaml}
-                    set {_duration} to yaml value "potion.effects.%{_node::3}%.duration" from {_yaml}
-                    set {_ambient} to yaml value "potion.effects.%{_node::3}%.ambient" from {_yaml}
-                    set {_show_particles} to yaml value "potion.effects.%{_node::3}%.show-particles" from {_yaml}
-                    set {_show_icon} to yaml value "potion.effects.%{_node::3}%.show-icon" from {_yaml}
-                    set {_effects::%{_loop}%} to empty nbt compound
-                    if {_show_particles} is true:
-                        set {_show_particles_byte} to 1
-                    else:
-                        set {_show_particles_byte} to 0
-                    if {_show_icon} is true:
-                        set {_show_icon_byte} to 1
-                    else:
-                        set {_show_icon_byte} to 0
-                    if {_ambient} is true:
-                        set {_ambient_byte} to 1
-                    else:
-                        set {_ambient_byte} to 0
-                    set string tag "id" of {_effects::%{_loop}%} to {_id}
-                    set byte tag "amplifier" of {_effects::%{_loop}%} to {_amplifier}
-                    set int tag "duration" of {_effects::%{_loop}%} to {_duration}
-                    set byte tag "ambient" of {_effects::%{_loop}%} to {_ambient_byte}
-                    set byte tag "show_particles" of {_effects::%{_loop}%} to {_show_particles_byte}
-                    set byte tag "show_icon" of {_effects::%{_loop}%} to {_show_icon_byte}
-                    add 1 to {_loop}
-            set compound list tag "custom_effects" of {_potion_content} to {_effects::*}
-            set string tag "potion" of {_potion_content} to {_potion}
-            set int tag "custom_color" of {_potion_content} to {_color}
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Tooltip Style
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "tooltip-style":
-            set {_tooltips-style} to yaml value "tooltip-style" from {_yaml}
-            set string tag "minecraft:tooltip_style" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_tooltips-style}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Disabled behaviors
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "disabled-behaviors":
-            set string list tag "SKIC-DISABLED-BEHAVIORS" of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to yaml list "disabled-behaviors" from {_yaml}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Enchants
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "enchants":
-            set {_enchants::*} to yaml list "enchants" from {_yaml}
-            loop {_enchants::*}:
-                set {_e} to loop-value-2
-                replace all ":" with " " in {_e}
-                set {_e} to "%{_e}%" parsed as enchantment type
-                enchant {skitemcreator.items.database::%{_filename}%::final-item} with {_e}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Advanced Enchantments (Needs AdvancedEnchantments)
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "advanced-enchants":
-            parse if plugin "AdvancedEnchantments" is enabled:
-                set {_advanced-enchants::*} to yaml list "advanced-enchants" from {_yaml}
-                if {_advanced-enchants::*} is set:
-                    loop {_advanced-enchants::*}:
-                        set {_e} to loop-value-2
-                        #Vanilla enchant
-                        set {_e::*} to {_e} split by ":"
-                        set {_enchant} to {_e::1}
-                        set {_enchantlevel} to {_e::2} parsed as integer
-                        set {_advancedenchant-api.class} to class "net.advancedplugins.ae.api.AEAPI"
-                        set {skitemcreator.items.database::%{_filename}%::final-item} to {_advancedenchant-api.class}.applyEnchant({_enchant}, {_enchantlevel}, {skitemcreator.items.database::%{_filename}%::final-item})
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Permission
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "permission":
-            set string tag "SKIC-PERMISSION" of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to yaml value "permission" from {_yaml}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Skript effects
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "skript": 
-            delete {skitemcreator.items.database::%{_filename}%::skript::*}
-            loop yaml node keys "skript" from {_yaml}:
-                set {_node::*} to "%loop-node%" split at "."
-                if {_node::2} is set:
-                    set {_event} to yaml value "skript.%{_node::2}%.event" from {_yaml}
-                    set {_cooldown} to yaml value "skript.%{_node::2}%.cooldown" from {_yaml}
-                    set {_execute::*} to yaml list "skript.%{_node::2}%.execute" from {_yaml}
-                    add {_node::2} to {skitemcreator.items.database::%{_filename}%::skript::*}
-                    set {skitemcreator.items.database::%{_filename}%::skript::%{_node::2}%::event} to {_event}
-                    set {skitemcreator.items.database::%{_filename}%::skript::%{_node::2}%::cooldown} to {_cooldown}
-                    set {skitemcreator.items.database::%{_filename}%::skript::%{_node::2}%::execute::*} to {_execute::*}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Mythic Skills
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "mythic-skills":
-            delete {skitemcreator.items.database::%{_filename}%::mythic-skills::*}
-            loop yaml node keys "mythic-skills" from {_yaml}:
-                set {_node::*} to "%loop-node%" split at "."
-                if {_node::2} is set:
-                    set {_event} to yaml value "mythic-skills.%{_node::2}%.event" from {_yaml}
-                    set {_skill} to yaml value "mythic-skills.%{_node::2}%.skill" from {_yaml}
-                    add {_node::2} to {skitemcreator.items.database::%{_filename}%::mythic-skills::*}
-                    set {skitemcreator.items.database::%{_filename}%::mythic-skills::%{_node::2}%::event} to {_event}
-                    set {skitemcreator.items.database::%{_filename}%::mythic-skills::%{_node::2}%::skill} to {_skill}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Save NBT
-        #If your item is a block, you can set save-nbt to true in order to save its nbt when placed.
-        #WARNING: ALL physics will be disabled.
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "save-nbt":
-            set {_save-nbt} to yaml value "save-nbt" from {_yaml}
-            if {_save-nbt} is set:
-                set {skitemcreator.items.database::%{_filename}%::save-nbt} to {_save-nbt}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Apply SKRPG Stats (Needs SkRPG)
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "stats":
-            #Apply stats
-            #Checks if SKRPG and SKRPGITEMSADDON are loaded
-            parse if script "SkRPG/Main/!Main/SkRPG.sk" is loaded:
-                parse if script "SkRPG/Main/Addons/SkRPGItemsAddon.sk" is loaded:
-                    #Masquer les lignes de stats
-                    if yaml value "hide-stat-lore" from {_yaml} is true:
-                        set {_stats-show} to false
-                    else:
-                        set {_stats-show} to true
-                    set {_stats::*} to yaml list "stats" from {_yaml}
-                    if {_stats::*} is set:
-                        loop {_stats::*}:
-                            set {_st::*} to loop-value-2 split at ":"
-                            add {_st::1} to {skitemcreator.items.database::%{_filename}%::stats::*} 
-                            #Check if a range is set
-                            set {_st-range::*} to {_st::2} split at "~"
-                            if {_st-range::2} is set:
-                                #Tells to Skript that this item can generate random stats
-                                set {skitemcreator.items.database::%{_filename}%::has-random-stats} to true
-                                #Store min and max range
-                                set {skitemcreator.items.database::%{_filename}%::stats::%{_st::1}%::min} to {_st-range::1} parsed as integer
-                                set {skitemcreator.items.database::%{_filename}%::stats::%{_st::1}%::max} to {_st-range::2} parsed as integer
-                                set {skitemcreator.items.database::%{_filename}%::final-item} to skRPGItemsAddonSetStat({skitemcreator.items.database::%{_filename}%::final-item}, {_st::1}, {_st-range::2} parsed as integer, {_stats-show})
-                            else:
-                                #Check if value is set
-                                set {_int} to {_st::2} parsed as integer
-                                set {skitemcreator.items.database::%{_filename}%::stats::%{_st::1}%::static-amount} to {_int}
-                                if {_int} is set:
-                                    set {skitemcreator.items.database::%{_filename}%::final-item} to skRPGItemsAddonSetStat({skitemcreator.items.database::%{_filename}%::final-item}, {_st::1}, {_int}, {_hide-stats})
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Rarity
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "rarity":
-            set string tag "SKIC-RARITY" of {skitemcreator.items.database::%{_filename}%::final-item} to yaml value "rarity" of {_yaml}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Custom damage
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "custom-damage":
-            set {_damage} to yaml value "custom-damage" from {_yaml}
-            set {_dmg::*} to "%{_damage}%" split by "~"
-            if {_dmg::2} is set:
-                set {skitemcreator.items.database::%{_filename}%::damage::max} to {_dmg::2} parsed as integer
-                set {skitemcreator.items.database::%{_filename}%::damage::min} to {_dmg::1} parsed as integer
-            else:
-                set {skitemcreator.items.database::%{_filename}%::damage} to "%{_damage}%" parsed as integer
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Conditions
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "conditions":
-            loop yaml node keys "conditions" from {_yaml}:
-                set {_node::*} to "%loop-node%" split at "."
-                if {_node::2} is set:
-                    set {_condition} to {_node::2}
-                    add {_condition} to {skitemcreator.items.database::%{_filename}%::conditions::*}
-                    set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::message} to formatted yaml value "conditions.%{_condition}%.message" from {_yaml}
-                    set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::comparator} to yaml value "conditions.%{_condition}%.comparator" from {_yaml}
-                    set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::value} to yaml value "conditions.%{_condition}%.value" from {_yaml}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Spawner
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "spawner":
-            set {_n} to empty nbt compound
-            set {_block-entity-data} to compound tag "block_entity_data" of {_n}
-            set string tag "id" of {_block-entity-data} to yaml value "spawner.id" from {_yaml}
-            #Entity
-            set {_spawn-data} to compound tag "SpawnData" of {_block-entity-data}
-            set {_entity-tag} to compound tag "entity" of {_spawn-data}
-            set string tag "id" of {_entity-tag} to yaml value "spawner.entity" from {_yaml}
-            #Other options
-            set short tag "Delay" of {_block-entity-data} to yaml value "spawner.delay" from {_yaml}
-            set short tag "MaxNearbyEntities" of {_block-entity-data} to yaml value "spawner.max-nearby-entities" from {_yaml}
-            set short tag "RequiredPlayerRange" of {_block-entity-data} to yaml value "spawner.required-player-range" from {_yaml}
-            set short tag "SpawnCount" of {_block-entity-data} to yaml value "spawner.spawn-count" from {_yaml}
-            set short tag "MinSpawnDelay" of {_block-entity-data} to yaml value "spawner.min-spawn-delay" from {_yaml}
-            set short tag "MaxSpawnDelay" of {_block-entity-data} to yaml value "spawner.max-spawn-delay" from {_yaml}
-            set short tag "SpawnRange" of {_block-entity-data} to yaml value "spawner.spawn-range" from {_yaml}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Repair cost
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "repair-cost":
+			set {_repair-cost} to yaml value "repair-cost" from {_yaml}
+			set int tag "minecraft:repair_cost" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_repair-cost}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Use cooldown (Coming for 1.21.3)
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "use-cooldown":
+			set {_n} to empty nbt compound
+			set {_seconds} to yaml value "use-cooldown.seconds" from {_yaml}
+			set {_group} to yaml value "use-cooldown.group" from {_yaml}
+			set {_use-cooldown-tag} to compound tag "minecraft:use_cooldown" of {_n}
+			set int tag "seconds" of {_use-cooldown-tag} to {_seconds}
+			set string tag "cooldown_group" of {_use-cooldown-tag} to {_group}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Item model
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "item-model":
+			set {_model} to yaml value "item-model" from {_yaml}
+			set string tag "minecraft:item_model" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_model}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Max damage
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "max-damage":
+			set {_dmg} to yaml value "max-damage" from {_yaml}
+			set int tag "minecraft:max_damage" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_dmg}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Potion contents
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "potion":
+			set {_n} to empty nbt compound
+			set {_potion_content} to compound tag "minecraft:potion_contents" of {_n}
+			set {_potion} to yaml value "potion.id" from {_yaml}
+			set {_color} to yaml value "potion.custom-color" from {_yaml}
+			set {_loop} to 1
+			loop yaml node keys "potion.effects" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::3} is set:
+					set {_id} to yaml value "potion.effects.%{_node::3}%.id" from {_yaml}
+					set {_amplifier} to yaml value "potion.effects.%{_node::3}%.amplifier" from {_yaml}
+					set {_duration} to yaml value "potion.effects.%{_node::3}%.duration" from {_yaml}
+					set {_ambient} to yaml value "potion.effects.%{_node::3}%.ambient" from {_yaml}
+					set {_show_particles} to yaml value "potion.effects.%{_node::3}%.show-particles" from {_yaml}
+					set {_show_icon} to yaml value "potion.effects.%{_node::3}%.show-icon" from {_yaml}
+					set {_effects::%{_loop}%} to empty nbt compound
+					if {_show_particles} is true:
+						set {_show_particles_byte} to 1
+					else:
+						set {_show_particles_byte} to 0
+					if {_show_icon} is true:
+						set {_show_icon_byte} to 1
+					else:
+						set {_show_icon_byte} to 0
+					if {_ambient} is true:
+						set {_ambient_byte} to 1
+					else:
+						set {_ambient_byte} to 0
+					set string tag "id" of {_effects::%{_loop}%} to {_id}
+					set byte tag "amplifier" of {_effects::%{_loop}%} to {_amplifier}
+					set int tag "duration" of {_effects::%{_loop}%} to {_duration}
+					set byte tag "ambient" of {_effects::%{_loop}%} to {_ambient_byte}
+					set byte tag "show_particles" of {_effects::%{_loop}%} to {_show_particles_byte}
+					set byte tag "show_icon" of {_effects::%{_loop}%} to {_show_icon_byte}
+					add 1 to {_loop}
+			set compound list tag "custom_effects" of {_potion_content} to {_effects::*}
+			set string tag "potion" of {_potion_content} to {_potion}
+			set int tag "custom_color" of {_potion_content} to {_color}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Tooltip Style
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "tooltip-style":
+			set {_tooltips-style} to yaml value "tooltip-style" from {_yaml}
+			set string tag "minecraft:tooltip_style" of nbt of {skitemcreator.items.database::%{_filename}%::final-item} to {_tooltips-style}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Disabled behaviors
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "disabled-behaviors":
+			set string list tag "SKIC-DISABLED-BEHAVIORS" of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to yaml list "disabled-behaviors" from {_yaml}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Enchants
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "enchants":
+			set {_enchants::*} to yaml list "enchants" from {_yaml}
+			loop {_enchants::*}:
+				set {_e} to loop-value-2
+				replace all ":" with " " in {_e}
+				set {_e} to "%{_e}%" parsed as enchantment type
+				enchant {skitemcreator.items.database::%{_filename}%::final-item} with {_e}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Advanced Enchantments (Needs AdvancedEnchantments)
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "advanced-enchants":
+			parse if plugin "AdvancedEnchantments" is enabled:
+				set {_advanced-enchants::*} to yaml list "advanced-enchants" from {_yaml}
+				if {_advanced-enchants::*} is set:
+					loop {_advanced-enchants::*}:
+						set {_e} to loop-value-2
+						#Vanilla enchant
+						set {_e::*} to {_e} split by ":"
+						set {_enchant} to {_e::1}
+						set {_enchantlevel} to {_e::2} parsed as integer
+						set {_advancedenchant-api.class} to class "net.advancedplugins.ae.api.AEAPI"
+						set {skitemcreator.items.database::%{_filename}%::final-item} to {_advancedenchant-api.class}.applyEnchant({_enchant}, {_enchantlevel}, {skitemcreator.items.database::%{_filename}%::final-item})
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Permission
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "permission":
+			set string tag "SKIC-PERMISSION" of custom nbt of {skitemcreator.items.database::%{_filename}%::final-item} to yaml value "permission" from {_yaml}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Skript effects
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "skript": 
+			delete {skitemcreator.items.database::%{_filename}%::skript::*}
+			loop yaml node keys "skript" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::2} is set:
+					set {_event} to yaml value "skript.%{_node::2}%.event" from {_yaml}
+					set {_cooldown} to yaml value "skript.%{_node::2}%.cooldown" from {_yaml}
+					set {_execute::*} to yaml list "skript.%{_node::2}%.execute" from {_yaml}
+					add {_node::2} to {skitemcreator.items.database::%{_filename}%::skript::*}
+					set {skitemcreator.items.database::%{_filename}%::skript::%{_node::2}%::event} to {_event}
+					set {skitemcreator.items.database::%{_filename}%::skript::%{_node::2}%::cooldown} to {_cooldown}
+					set {skitemcreator.items.database::%{_filename}%::skript::%{_node::2}%::execute::*} to {_execute::*}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Mythic Skills
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "mythic-skills":
+			delete {skitemcreator.items.database::%{_filename}%::mythic-skills::*}
+			loop yaml node keys "mythic-skills" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::2} is set:
+					set {_event} to yaml value "mythic-skills.%{_node::2}%.event" from {_yaml}
+					set {_skill} to yaml value "mythic-skills.%{_node::2}%.skill" from {_yaml}
+					add {_node::2} to {skitemcreator.items.database::%{_filename}%::mythic-skills::*}
+					set {skitemcreator.items.database::%{_filename}%::mythic-skills::%{_node::2}%::event} to {_event}
+					set {skitemcreator.items.database::%{_filename}%::mythic-skills::%{_node::2}%::skill} to {_skill}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Custom block
+		#If your item is a block, you can set save-nbt to true in order to save its nbt when placed.
+		#WARNING: ALL physics will be disabled.
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "custom-block":
+			set {skitemcreator.items.database::%{_filename}%::custom-block::save-nbt} to true
 
-            #
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Block state
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        else if {_key} is "block-state":
-            set {_n} to empty nbt compound
-            set {_block-state} to compound tag "block_state" of {_n}
-            set {_block-state-type} to yaml value "block-state.type" from {_yaml}
-            set {_block-state-value} to yaml value "block-state.value" from {_yaml} 
-            set string tag "%{_block-state-type}%" of {_block-state} to {_block-state-value}
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Can break (Only works with adventure gamemode)
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
-        else if {_key} is "can-break":
-            set {_blocks::*} to yaml list "can-break.blocks" from {_yaml}
-            set {_n} to empty nbt compound
-            set {_can-break} to compound tag "can_break" of {_n}
-            set string list tag "blocks" of {_can-break} to {_blocks::*}
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Consumable
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
-        else if {_key} is "consumable":
-            set {_n} to empty nbt compound
-            set {_consumable} to compound tag "consumable" of {_n}
-            set float tag "consume_seconds" of {_consumable} to yaml value "consumable.consume-seconds" of {_yaml}
-            set string tag "animation" of {_consumable} to yaml value "consumable.animation" of {_yaml}
-            set string tag "sound" of {_consumable} to yaml value "consumable.sound" of {_yaml}
-            set {_show-particles} to yaml value "consumable.has-particles" of {_yaml}
-            if {_show-particles} is true:
-                set {_show-particles} to 1
-            else:
-                set {_show-particles} to 0
-            set byte tag "has_consume_particles" of {_consumable} to {_show-particles}
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Damage resistant
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
-        else if {_key} is "damage-resistant":
-            set {_n} to empty nbt compound
-            set {_resistances} to yaml value "damage-resistant" of {_yaml}
-            set {_damage-types} to compound tag "damage_resistant" of {_n}
-            set string tag "types" of {_damage-types} to {_resistances}
-            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #
-        #Glider
-        #
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
-        else if {_key} is "glider":
-            add nbt from "{""minecraft:glider"":{}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+			#Self drop
+			set {_self-drop} to yaml value "custom-block.self-drop" from {_yaml}
+			if {_self-drop} is not set:
+				set {_self-drop} to true
+			set {skitemcreator.items.database::%{_filename}%::custom-block::self-drop} to {_self-drop}
+
+			#Clear natural drops
+			set {_clear-natural-drops} to yaml value "custom-block.clear-natural-drops" from {_yaml}
+			if {_clear-natural-drops} is not set:
+				set {_clear-natural-drops} to true
+			set {skitemcreator.items.database::%{_filename}%::custom-block::clear-natural-drops} to {_clear-natural-drops}
+
+			#Immune to explosions
+			set {_immune-to-explosions} to yaml value "custom-block.immune-to-explosions" from {_yaml}
+			if {_immune-to-explosions} is not set:
+				set {_immune-to-explosions} to false
+			set {skitemcreator.items.database::%{_filename}%::custom-block::immune-to-explosions} to {_immune-to-explosions}
+
+			#Whitelisted tools
+			set {_whitelisted-tools::*} to yaml list "custom-block.whitelisted-tools" from {_yaml}
+			if {_whitelisted-tools::*} is set:
+				loop {_whitelisted-tools::*}:
+					set {_item} to loop-value-2
+					#If item is vanilla
+					set {_item-material} to Material.getMaterial({_item})
+					if {_item-material} is set:
+						set {_i} to new ItemStack({_item-material})
+						add {_i} to {skitemcreator.items.database::%{_filename}%::custom-block::whitelisted-tools::*}
+					#Else if it's skitemcreator
+					else:
+						add {skitemcreator.items.database::%{_item}%::final-item} to {skitemcreator.items.database::%{_filename}%::custom-block::whitelisted-tools::*}
+
+			#Blacklisted tools
+			set {_blacklisted-tools::*} to yaml list "custom-block.blacklisted-tools" from {_yaml}
+			if {_blacklisted-tools::*} is set:
+				loop {_blacklisted-tools::*}:
+					set {_item} to loop-value-2
+					#If item is vanilla
+					set {_item-material} to Material.getMaterial({_item})
+					if {_item-material} is set:
+						set {_i} to new ItemStack({_item-material})
+						add {_i} to {skitemcreator.items.database::%{_filename}%::custom-block::blacklisted-tools::*}
+					#Else if it's skitemcreator
+					else:
+						add {skitemcreator.items.database::%{_item}%::final-item} to {skitemcreator.items.database::%{_filename}%::custom-block::blacklisted-tools::*}
+
+			#Skript effects
+			loop yaml node keys "custom-block.skript" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::3} is set:
+					set {_event} to yaml value "custom-block.skript.%{_node::3}%.event" from {_yaml}
+					set {_execute::*} to yaml list "custom-block.skript.%{_node::3}%.execute" from {_yaml}
+					add {_node::3} to {skitemcreator.items.database::%{_filename}%::custom-block::skript::*}
+					set {skitemcreator.items.database::%{_filename}%::custom-block::skript::%{_node::3}%::event} to {_event}
+					if yaml value "custom-block.skript.%{_node::3}%.cooldown" from {_yaml} is set:
+						set {skitemcreator.items.database::%{_filename}%::custom-block::skript::%{_node::3}%::cooldown} to yaml value "custom-block.skript.%{_node::3}%.cooldown" from {_yaml}
+					set {skitemcreator.items.database::%{_filename}%::custom-block::skript::%{_node::3}%::execute::*} to {_execute::*}
 
 
+			#Custom drops
+			set {_drops::*} to yaml list "custom-block.drops" from {_yaml}
+			if {_drops::*} is set:
+				loop {_drops::*}:
+					set {_item} to loop-value-2
+					set {_split::*} to {_item} split at " "
+					if {_split::2} is set:
+						set {_quantity} to {_split::1} parsed as integer
+						set {_item} to {_split::2}
+					else:
+						set {_item} to {_split::1}
+						set {_quantity} to 1
+					#If item is vanilla
+					set {_item-material} to Material.getMaterial({_item})
+					if {_item-material} is set:
+						set {_i} to new ItemStack({_item-material})
+						add {_quantity} of {_i} to {skitemcreator.items.database::%{_filename}%::custom-block::drops::*}
+					#Else if it's skitemcreator
+					else:
+						add {_quantity} of {skitemcreator.items.database::%{_item}%::final-item} to {skitemcreator.items.database::%{_filename}%::custom-block::drops::*}
 
-        #
-        #Unload yaml when everything is loaded
-        #
-        unload yaml {_yaml}
+
+		   
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Apply SKRPG Stats (Needs SkRPG)
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "stats":
+			#Apply stats
+			#Checks if SKRPG and SKRPGITEMSADDON are loaded
+			parse if script "SkRPG/Main/!Main/SkRPG.sk" is loaded:
+				parse if script "SkRPG/Main/Addons/SkRPGItemsAddon.sk" is loaded:
+					#Masquer les lignes de stats
+					if yaml value "hide-stat-lore" from {_yaml} is true:
+						set {_stats-show} to false
+					else:
+						set {_stats-show} to true
+					set {_stats::*} to yaml list "stats" from {_yaml}
+					if {_stats::*} is set:
+						loop {_stats::*}:
+							set {_st::*} to loop-value-2 split at ":"
+							add {_st::1} to {skitemcreator.items.database::%{_filename}%::stats::*} 
+							#Check if a range is set
+							set {_st-range::*} to {_st::2} split at "~"
+							if {_st-range::2} is set:
+								#Tells to Skript that this item can generate random stats
+								set {skitemcreator.items.database::%{_filename}%::has-random-stats} to true
+								#Store min and max range
+								set {skitemcreator.items.database::%{_filename}%::stats::%{_st::1}%::min} to {_st-range::1} parsed as integer
+								set {skitemcreator.items.database::%{_filename}%::stats::%{_st::1}%::max} to {_st-range::2} parsed as integer
+								set {skitemcreator.items.database::%{_filename}%::final-item} to skRPGItemsAddonSetStat({skitemcreator.items.database::%{_filename}%::final-item}, {_st::1}, {_st-range::2} parsed as integer, {_stats-show})
+							else:
+								#Check if value is set
+								set {_int} to {_st::2} parsed as integer
+								set {skitemcreator.items.database::%{_filename}%::stats::%{_st::1}%::static-amount} to {_int}
+								if {_int} is set:
+									set {skitemcreator.items.database::%{_filename}%::final-item} to skRPGItemsAddonSetStat({skitemcreator.items.database::%{_filename}%::final-item}, {_st::1}, {_int}, {_hide-stats})
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Rarity
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "rarity":
+			set string tag "SKIC-RARITY" of {skitemcreator.items.database::%{_filename}%::final-item} to yaml value "rarity" of {_yaml}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Custom damage
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "custom-damage":
+			set {_damage} to yaml value "custom-damage" from {_yaml}
+			set {_dmg::*} to "%{_damage}%" split by "~"
+			if {_dmg::2} is set:
+				set {skitemcreator.items.database::%{_filename}%::damage::max} to {_dmg::2} parsed as integer
+				set {skitemcreator.items.database::%{_filename}%::damage::min} to {_dmg::1} parsed as integer
+			else:
+				set {skitemcreator.items.database::%{_filename}%::damage} to "%{_damage}%" parsed as integer
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Conditions
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "conditions":
+			loop yaml node keys "conditions" from {_yaml}:
+				set {_node::*} to "%loop-node%" split at "."
+				if {_node::2} is set:
+					set {_condition} to {_node::2}
+					add {_condition} to {skitemcreator.items.database::%{_filename}%::conditions::*}
+					set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::message} to formatted yaml value "conditions.%{_condition}%.message" from {_yaml}
+					set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::comparator} to yaml value "conditions.%{_condition}%.comparator" from {_yaml}
+					set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::value} to yaml value "conditions.%{_condition}%.value" from {_yaml}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Spawner
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "spawner":
+			set {_n} to empty nbt compound
+			set {_block-entity-data} to compound tag "block_entity_data" of {_n}
+			set string tag "id" of {_block-entity-data} to yaml value "spawner.id" from {_yaml}
+			#Entity
+			set {_spawn-data} to compound tag "SpawnData" of {_block-entity-data}
+			set {_entity-tag} to compound tag "entity" of {_spawn-data}
+			set string tag "id" of {_entity-tag} to yaml value "spawner.entity" from {_yaml}
+			#Other options
+			set short tag "Delay" of {_block-entity-data} to yaml value "spawner.delay" from {_yaml}
+			set short tag "MaxNearbyEntities" of {_block-entity-data} to yaml value "spawner.max-nearby-entities" from {_yaml}
+			set short tag "RequiredPlayerRange" of {_block-entity-data} to yaml value "spawner.required-player-range" from {_yaml}
+			set short tag "SpawnCount" of {_block-entity-data} to yaml value "spawner.spawn-count" from {_yaml}
+			set short tag "MinSpawnDelay" of {_block-entity-data} to yaml value "spawner.min-spawn-delay" from {_yaml}
+			set short tag "MaxSpawnDelay" of {_block-entity-data} to yaml value "spawner.max-spawn-delay" from {_yaml}
+			set short tag "SpawnRange" of {_block-entity-data} to yaml value "spawner.spawn-range" from {_yaml}
+
+			#
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Block state
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		else if {_key} is "block-state":
+			set {_n} to empty nbt compound
+			set {_block-state} to compound tag "block_state" of {_n}
+			set {_block-state-type} to yaml value "block-state.type" from {_yaml}
+			set {_block-state-value} to yaml value "block-state.value" from {_yaml} 
+			set string tag "%{_block-state-type}%" of {_block-state} to {_block-state-value}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Can break (Only works with adventure gamemode)
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+		else if {_key} is "can-break":
+			set {_blocks::*} to yaml list "can-break.blocks" from {_yaml}
+			set {_n} to empty nbt compound
+			set {_can-break} to compound tag "can_break" of {_n}
+			set string list tag "blocks" of {_can-break} to {_blocks::*}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Consumable
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+		else if {_key} is "consumable":
+			set {_n} to empty nbt compound
+			set {_consumable} to compound tag "consumable" of {_n}
+			set float tag "consume_seconds" of {_consumable} to yaml value "consumable.consume-seconds" of {_yaml}
+			set string tag "animation" of {_consumable} to yaml value "consumable.animation" of {_yaml}
+			set string tag "sound" of {_consumable} to yaml value "consumable.sound" of {_yaml}
+			set {_show-particles} to yaml value "consumable.has-particles" of {_yaml}
+			if {_show-particles} is true:
+				set {_show-particles} to 1
+			else:
+				set {_show-particles} to 0
+			set byte tag "has_consume_particles" of {_consumable} to {_show-particles}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Damage resistant
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+		else if {_key} is "damage-resistant":
+			set {_n} to empty nbt compound
+			set {_resistances} to yaml value "damage-resistant" of {_yaml}
+			set {_damage-types} to compound tag "damage_resistant" of {_n}
+			set string tag "types" of {_damage-types} to {_resistances}
+			add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		#
+		#Glider
+		#
+		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+		else if {_key} is "glider":
+			add nbt from "{""minecraft:glider"":{}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
 
 
 
-    #
-    #Replace placeholders
-    #
-    set {skitemcreator.items.database::%{_filename}%::final-item} to SKICReplaceLorePlaceholders({skitemcreator.items.database::%{_filename}%::final-item})
-    set {skitemcreator.items.database::%{_filename}%::final-item} to SKICReplaceNamePlaceholders({skitemcreator.items.database::%{_filename}%::final-item}) 
+		#
+		#Unload yaml when everything is loaded
+		#
+		unload yaml {_yaml}
+
+
+
+	#
+	#Replace placeholders
+	#
+	set {skitemcreator.items.database::%{_filename}%::final-item} to SKICReplaceLorePlaceholders({skitemcreator.items.database::%{_filename}%::final-item})
+	set {skitemcreator.items.database::%{_filename}%::final-item} to SKICReplaceNamePlaceholders({skitemcreator.items.database::%{_filename}%::final-item}) 

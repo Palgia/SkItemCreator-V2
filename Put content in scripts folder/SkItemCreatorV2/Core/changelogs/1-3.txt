@@ -1,0 +1,18 @@
+-- items yml
+Added option 'custom-block' to customize your blocks! (See more in wiki) 
+
+Added new item examples:
+    - fake-diamond-ore
+    - jump-block
+
+-- API
+Added event "on skitemcreator block break"
+Added event "on skitemcreator block place"
+
+Added condition "%block% is a custom block[ from skitemcrator]
+Added condition "[skitemcreator ]id of %block% is %string%"
+
+Added function SKICIsCustomBlock(block: block). Returns true if block is a custom block
+Added function SKICGetBlockID(block: block). Returns the ID of the given block
+Added function SKICIsToolWhitelisted(item: item, block: block). Returns true if the given item is whitelisted
+Added function SKICIsToolBlacklisted(item: item, block: block). Returns true if the given item is whitelisted

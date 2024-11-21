@@ -1,0 +1,16 @@
+#
+#When a block from skitemcreaton is mined
+#location: event-vlocation
+#block: event-block
+#player: event-player
+#string: SkItemCreator ID of the event-block
+event "skitemcreator-block-place":
+    pattern: [skitemcreator[ ]]block place
+    event-values: location, block, player, string
+
+on place:   
+    set {_event::player} to event-player
+    set {_event::location} to event-location
+    set {_event::block} to event-block
+    set {_event::string} to unformatted string tag "SKIC-INTERNAL-NAME" of custom nbt of event-item
+    call event (custom event "skitemcreator-block-place" with values {_event::*})

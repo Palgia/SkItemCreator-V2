@@ -1,0 +1,17 @@
+#
+#When a block from skitemcreaton is mined
+#location: event-vlocation
+#block: event-block
+#player: event-player
+#string: SkItemCreator ID of the event-block
+event "skitemcreator-block-break":
+    pattern: [skitemcreator[ ]]block break
+    event-values: location, block, player, string
+
+on break:   
+    string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of event-block is set
+    set {_event::player} to event-player
+    set {_event::location} to event-location
+    set {_event::block} to event-block
+    set {_event::string} to string tag "custom;SKIC-NBTSAVER-ID" of nbt of event-block
+    call event (custom event "skitemcreator-block-break" with values {_event::*})

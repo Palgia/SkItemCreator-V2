@@ -259,3 +259,29 @@ block-state:
 
 #[OPTIONAL]
 glider: true
+
+#[OPTIONAL] If your item is a block, you can define custom parameters!
+custom-block:
+  self-drop: true
+  #[OPTIONAL]
+  clear-natural-drops: true
+  #[OPTIONAL]
+  immune-to-explosions: true
+  #[OPTIONAL] Can be vanilla items or IDs from SkItemCreator
+  drops:
+    - GUNPOWDER
+  #[OPTIONAL]Can be vanilla items or IDs from SkItemCreator
+  whitelisted-tools:
+    - DIAMOND_PICKAXE
+    - custom-pickaxe
+  #[OPTIONAL] Can be vanilla items or Ids from SkItemCreator
+  blacklisted-tools:
+    - IRON_PICKAXE
+  #[OPTIONAL]
+  skript:
+    1:
+      #Events can be PLACE, BREAK, WALK
+      event: BREAK
+      execute:
+      - create fake explosion at event-block
+      - spawn 6 silverfish at event-block

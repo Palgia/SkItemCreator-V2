@@ -1,0 +1,167 @@
+                                                                                        
+import:
+    org.bukkit.event.player.PlayerMoveEvent
+
+#Save NBT on place
+on place:   
+    string tag "SKIC-INTERNAL-NAME" of custom nbt of event-item is set
+    set {_id} to unformatted string tag "SKIC-INTERNAL-NAME" of custom nbt of event-item
+    {skitemcreator.items.database::%{_id}%::custom-block::save-nbt} is true
+    set {_nbt} to nbt of event-block
+    set string tag "custom;SKIC-NBTSAVER-NBT" of {_nbt} to "%nbt of event-item%"
+    set string tag "custom;SKIC-NBTSAVER-ITEMTYPE" of {_nbt} to "%type of event-item%"
+    set string tag "custom;SKIC-NBTSAVER-ID" of {_nbt} to {_id}
+
+#Drops on break
+on break:
+    gamemode of player is not creative
+    string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of event-block is set 
+    set {_id} to string tag "custom;SKIC-NBTSAVER-ID" of nbt of event-block
+    #If tool of player is blacklisted
+    if SKICIsToolBlacklisted(tool of player, event-block) is true:
+        cancel event
+        stop
+    #If tool of player is not whitelisted
+    if SKICIsToolWhitelisted(tool of player, event-block) is false:
+        cancel event
+        stop    
+    #Clear natural drops
+    if {skitemcreator.items.database::%{_id}%::custom-block::clear-natural-drops} is true:
+        clear drops  
+    #Self drop
+    if {skitemcreator.items.database::%{_id}%::custom-block::self-drop} is true:
+        set {_nbt} to string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of event-block
+        set {_i} to (string tag "custom;SKIC-NBTSAVER-ITEMTYPE" of nbt compound of event-block parsed as item) 
+        add nbt of {_nbt} to nbt compound of {_i}
+        drop {_i} at event-block
+    #Drops
+    if {skitemcreator.items.database::%{_id}%::custom-block::drops::*} is set:
+        drop {skitemcreator.items.database::%{_id}%::custom-block::drops::*} at event-location
+ 
+#Disable physics
+on piston extend:
+    loop moved blocks:
+        if string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of loop-block is set:
+            cancel event
+on piston retract:
+    loop moved blocks:
+        if string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of loop-block is set:
+            cancel event
+
+#Keep NBT when exploded
+on explode:
+    loop exploded blocks:
+        string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of loop-block is set 
+        set {_id} to string tag "custom;SKIC-NBTSAVER-ID" of nbt of loop-block
+        remove loop-block from exploded blocks
+        #Immune to explosions:
+        if {skitemcreator.items.database::%{_id}%::custom-block::immune-to-explosions} is true:
+            stop
+        #Self drop
+        if {skitemcreator.items.database::%{_id}%::custom-block::self-drop} is true:
+            set {_nbt} to string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of loop-block
+            set {_i} to (string tag "custom;SKIC-NBTSAVER-ITEMTYPE" of nbt compound of loop-block parsed as item) 
+            add nbt of {_nbt} to nbt compound of {_i}
+            drop {_i} at loop-block
+        #Drops
+        if {skitemcreator.items.database::%{_id}%::custom-block::drops::*} is set:
+            drop {skitemcreator.items.database::%{_id}%::custom-block::drops::*} at loop-block
+        set loop-block to air
+
+#Execute skript effects
+#BREAK
+on break: 
+    string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of event-block is set 
+    set {_id} to string tag "custom;SKIC-NBTSAVER-ID" of nbt of event-block
+    set {_event-block} to event-block
+    set {_p} to event.getPlayer()
+    create section with {_id}, {_event-block}, {_p} stored in {_section}:
+        loop {skitemcreator.items.database::%{_id}%::custom-block::skript::*} where [{skitemcreator.items.database::%{_id}%::custom-block::skript::%input%::event} is "BREAK"]:
+            #Check cooldown:
+            if {skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::cooldown} is set:
+                set {_diff} to difference between {skitemcreator.player.database::%uuid of {_p}%::custom-block-skript-cooldown::%{_id}%} and now
+                set {_time} to "%{skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::cooldown}% ticks" parsed as timespan
+                if {_diff} is less than {_time}:
+                    stop
+                set {_can-execute} to true
+                set {skitemcreator.player.database::%uuid of {_p}%::custom-block-skript-cooldown::%{_id}%} to now
+            else:
+                set {_can-execute} to true
+            {_can-execute} is true
+            set {_code::*} to {skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::execute::*}
+            loop {_code::*}:
+                replace all "event-block" with "location at %x-coords of {_event-block}%, %y-coords of {_event-block}%, %z-coords of {_event-block}%" in {_code::%loop-index-2%}
+        return {_code::*}
+    run section {_section} async and store result in {_code::*} and wait 
+    {_code::*} is set
+    loop {_code::*}:
+        if loop-value contains "wait":
+            set {_wait::*} to loop-value split at "wait "
+            set {_time} to {_wait::2} parsed as timespan
+            wait {_time}
+        else:
+            parse effect loop-value from event-player
+#PLACE
+on place: 
+    string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of event-block is set 
+    set {_id} to string tag "custom;SKIC-NBTSAVER-ID" of nbt of event-block
+    set {_event-block} to event-block
+    set {_p} to event.getPlayer()
+    create section with {_id}, {_event-block}, {_p} stored in {_section}:
+        loop {skitemcreator.items.database::%{_id}%::custom-block::skript::*} where [{skitemcreator.items.database::%{_id}%::custom-block::skript::%input%::event} is "PLACE"]:
+            #Check cooldown:
+            if {skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::cooldown} is set:
+                set {_diff} to difference between {skitemcreator.player.database::%uuid of {_p}%::custom-block-skript-cooldown::%{_id}%} and now
+                set {_time} to "%{skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::cooldown}% ticks" parsed as timespan
+                if {_diff} is less than {_time}:
+                    stop
+                set {_can-execute} to true
+                set {skitemcreator.player.database::%uuid of {_p}%::custom-block-skript-cooldown::%{_id}%} to now
+            else:
+                set {_can-execute} to true
+            {_can-execute} is true
+            set {_code::*} to {skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::execute::*}
+            loop {_code::*}:
+                replace all "event-block" with "location at %x-coords of {_event-block}%, %y-coords of {_event-block}%, %z-coords of {_event-block}%" in {_code::%loop-index-2%}
+        return {_code::*}
+    run section {_section} async and store result in {_code::*} and wait 
+    {_code::*} is set
+    loop {_code::*}:
+        if loop-value contains "wait":
+            set {_wait::*} to loop-value split at "wait "
+            set {_time} to {_wait::2} parsed as timespan
+            wait {_time}
+        else:
+            parse effect loop-value from event-player
+#WALK
+on PlayerMoveEvent: 
+    string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of block below event.getPlayer() is set 
+    set {_id} to string tag "custom;SKIC-NBTSAVER-ID" of nbt of block below event.getPlayer()
+    set {_event-block} to block below event.getPlayer()
+    set {_p} to event.getPlayer()
+    create section with {_id}, {_event-block}, {_p} stored in {_section}:
+        loop {skitemcreator.items.database::%{_id}%::custom-block::skript::*} where [{skitemcreator.items.database::%{_id}%::custom-block::skript::%input%::event} is "WALK"]:
+            #Check cooldown:
+            if {skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::cooldown} is set:
+                set {_diff} to difference between {skitemcreator.player.database::%uuid of {_p}%::custom-block-skript-cooldown::%{_id}%} and now
+                set {_time} to "%{skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::cooldown}% ticks" parsed as timespan
+                if {_diff} is less than {_time}:
+                    stop
+                set {_can-execute} to true
+                set {skitemcreator.player.database::%uuid of {_p}%::custom-block-skript-cooldown::%{_id}%} to now
+            else:
+                set {_can-execute} to true
+            {_can-execute} is true
+            set {_code::*} to {skitemcreator.items.database::%{_id}%::custom-block::skript::%loop-value%::execute::*}
+            loop {_code::*}:
+                replace all "event-block" with "location at %x-coords of {_event-block}%, %y-coords of {_event-block}%, %z-coords of {_event-block}%" in {_code::%loop-index-2%}
+        return {_code::*}
+    run section {_section} async and store result in {_code::*} and wait 
+    {_code::*} is set
+    loop {_code::*}:
+        if loop-value contains "wait":
+            set {_wait::*} to loop-value split at "wait "
+            set {_time} to {_wait::2} parsed as timespan
+            wait {_time}
+        else:
+            parse effect loop-value from event.getPlayer()

@@ -159,3 +159,53 @@ function SKICRandomGenerate(itemid: string) :: item:
                     else:
                         set {_item} to skRPGItemsAddonSetStat({_item}, loop-value, {skitemcreator.items.database::%{_itemid}%::stats::%loop-value%::static-amount})
                 return {_item}
+
+#
+#If a block is a custom block from SkItemCreator. Returns true or false
+#
+function SKICIsCustomBlock(block: block) :: boolean:
+
+    if string tag "custom;SKIC-NBTSAVER-ID" of nbt of {_block} is set:
+        return true
+    else:
+        return false
+
+#
+#Get the SkItemCreator ID of a block
+#
+function SKICGetBlockID(block: block) :: string:
+
+    return string tag "custom;SKIC-NBTSAVER-ID" of nbt of {_block}
+
+#
+#Returns true if tool of player is in the block's whitelisted tools.
+#
+function SKICIsToolWhitelisted(item: item, block: block) :: boolean:
+
+    set {_id} to string tag "custom;SKIC-NBTSAVER-ID" of nbt of {_block}
+    if SKICInternalNameOfItem({_item}) is set:
+        if {skitemcreator.items.database::%{_id}%::custom-block::whitelisted-tools::*} contains {_item}:
+            return true
+        else:
+            return false
+    else:
+        if {skitemcreator.items.database::%{_id}%::custom-block::whitelisted-tools::*} contains type of {_item}:
+            return true
+        else:
+            return false    
+#
+#Returns true if tool of player is in the block's blacklisted tools.
+#
+function SKICIsToolBlacklisted(item: item, block: block) :: boolean:
+
+    set {_id} to string tag "custom;SKIC-NBTSAVER-ID" of nbt of {_block}
+    if SKICInternalNameOfItem({_item}) is set:
+        if {skitemcreator.items.database::%{_id}%::custom-block::blacklisted-tools::*} contains {_item}:
+            return true
+        else:
+            return false
+    else:
+        if {skitemcreator.items.database::%{_id}%::custom-block::blacklisted-tools::*} contains type of {_item}:
+            return true
+        else:
+            return false    

@@ -1,0 +1,16 @@
+
+#Check if a block is from SkItemCreator
+condition %block% is a custom block[ from skitemcrator]:
+    check:
+        if string tag "custom;SKIC-NBTSAVER-NBT" of nbt compound of expr-1 is set:
+            continue
+        else:
+            exit
+
+#Check if the block a block from SkItemCreator with an ID
+condition [skitemcreator ]id of %block% is %string%:
+    check:
+        if string tag "custom;SKIC-NBTSAVER-ID" of nbt of expr-1 is expr-2:
+            continue
+        else:
+            exit
