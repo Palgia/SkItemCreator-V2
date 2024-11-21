@@ -1,0 +1,14 @@
+item:
+  type: VANILLA
+  value: OAK_DOOR
+
+name: "&b&lWeird Door"
+
+lore:
+  - ""
+  - "&fThis foor will always"
+  - "&fbe facing &dnorth&f!"
+
+block-state:
+  type: facing
+  value: north

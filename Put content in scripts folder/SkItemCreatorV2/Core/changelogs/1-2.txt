@@ -1,0 +1,20 @@
+-- features
+Added kits! Create your own kits in kits.yml
+
+-- API
+Added function SKICReturnKitItems(kit: string) to return all items in a kit.
+Added function SKICGiveKitToPlayer(p: player, kit: string, bypass: boolean) to give a kit to a player, with skript effects, cooldown etc. Se bypass to true to bypass the permission and cooldown.
+
+-- items yml
+Added new example items:
+    - wierd-door
+    - custom-spawner
+    - log-axe
+    - butter
+
+Added option 'spawner'
+Added option 'block-state'
+Added option 'can-break'
+Added option 'consumable'
+Added option 'damage-resistant'
+Added option 'glider'

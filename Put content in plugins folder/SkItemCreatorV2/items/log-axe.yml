@@ -1,0 +1,17 @@
+item:
+  type: vanilla
+  value: STONE_AXE
+
+name: "<##8C511A>&lLog Axe"
+
+lore:
+  - ""
+  - "&fThis axe was made"
+  - "&fonly for logs!"
+  - ""
+  - "&7&oOnly works with the"
+  - "&7&oadventure gamemode"
+
+can-break:
+  blocks:
+  - "oak_log"

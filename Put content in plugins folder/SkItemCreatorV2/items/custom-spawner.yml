@@ -1,0 +1,17 @@
+item:
+  type: VANILLA
+  value: SPAWNER
+
+name: "&6&lC&e&lustom &6&lS&e&lpider &6&lS&e&lpawner"
+
+#[OPTIONAL] If your item is SPAWNER, define custom block entity data here. See more here: https://minecraft.wiki/w/Chunk_format#Block_entity_format
+spawner:
+  entity: spider
+  id: "my-spawner"
+  delay: 2
+  max-nearby-entities: 10
+  required-player-range: 16
+  spawn-count: 1
+  spawn-range: 10
+  max-spawn-delay: 10
+  min-spawn-delay: 5

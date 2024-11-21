@@ -82,10 +82,18 @@ command /skitemcreator [<string="gui">] [<string="ALL">] [<string>]:
                 set {_sort} to arg 2
             play sound "block.chest.open" with volume 1 and pitch 1 to player
             SKICOpenGUI(player, 1, {_sort})
+        else if arg 1 is "getkit":
+            if arg 2 is set:
+                if {skitemcreator.kits::*} contains arg 2:
+                    SKICGiveKitToPlayer(player, arg 2, true)
+                else: 
+                    send "{@plugin-prefix} &cKit &e%arg 2% &cdoes not exists."
+            else:
+                send "{@plugin-prefix} &cSecond argument must be a kit."     
 
 
 on tab complete of "skitemcreator" or "skic" or "ski":
-    set tab completions for position 1 to "gui" and "get" and "randomgen" and "reload" and "import" and "delete"
+    set tab completions for position 1 to "gui" and "get" and "randomgen" and "reload" and "import" and "delete" and "getkit"
     if tab arg-1 is "reload":
         set tab completions for position 2 to "ALL" and {skitemcreator.items.database::*} and {skitemcreator.imported-items.database::*}
     else if tab arg-1 is "get" or "randomgen":
@@ -96,3 +104,5 @@ on tab complete of "skitemcreator" or "skic" or "ski":
         set tab completions for position 2 to "ALL" and "IMPORTED" and "CATEGORY"
         if tab arg-2 is "CATEGORY":
             set tab completions for position 3 to {skitemcreator.categories::*}
+    else if tab arg-1 is "getkit":
+        set tab completions for position 2 to {skitemcreator.kits::*}

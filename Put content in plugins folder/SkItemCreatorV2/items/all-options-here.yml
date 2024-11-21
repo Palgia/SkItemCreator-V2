@@ -222,3 +222,40 @@ conditions:
     message: "&4✖ &cThis item requires the test-variable to be greater than &e{value}"
     comparator: ">"
     value: 3
+
+#[OPTIONAL] If your item is MOB_SPAWNER, define custom block entity data here. See more here: https://minecraft.wiki/w/Chunk_format#Block_entity_format
+spawner:
+  entity: spider
+  id: "my-spawner"
+  delay: 2
+  max-nearby-entities: 10
+  required-player-range: 16
+  spawn-count: 1
+  max-spawn-delay: 10
+  min-spawn-delay: 5
+
+#[OPTIONAL] Damage resistance. See damage types here: https://minecraft.wiki/w/Tag#Damage_type_tags
+damage-resistant: "#is_fire"
+
+#[OPTIONAL]
+consumable:
+  consumable-seconds: 2.5
+  #[OPTIONAL] Default to 'eat'
+  animation: brush
+  #[OPTIONAL] Default to 'entity.generic.eat'
+  sound: entity.pig.hurt
+  #[OPTIONAL] Default to true
+  has-particles: false
+
+#[OPTIONAL]
+can-break:
+  blocks:
+  - "oak_log"
+
+#[OPTIONAL]
+block-state:
+  type: facing
+  value: north
+
+#[OPTIONAL]
+glider: true

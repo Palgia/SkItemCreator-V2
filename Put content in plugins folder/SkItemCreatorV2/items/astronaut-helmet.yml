@@ -29,3 +29,5 @@ equippable:
   swappable: true
   damage-on-hurt: true
   camera-overlay: "minecraft:block/white_stained_glass"
+
+glider: true

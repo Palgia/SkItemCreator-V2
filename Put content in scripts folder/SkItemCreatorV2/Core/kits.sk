@@ -1,0 +1,130 @@
+#
+#MISC OPTIONS
+#
+options:
+    #Plugin prefix
+    plugin-prefix: <##084CFB>[&lS<##2B47ED>&lk<##4F41DF>&lI<##723CD1>&lt<##9537C3>&le<##B832B5>&lm<##DC2CA7>&lC<##FF2799>&lr<##FA2A96>&le<##F42D92>&la<##EF308F>&lt<##E9348C>&lo<##E43789>&lr<##DE3A85>&lV<##D93D82>&l2]
+
+
+import:
+    org.bukkit.Material
+    org.bukkit.inventory.ItemStack
+#
+#Load kits
+#
+function SKICLoadKits():
+
+    load yaml "plugins/SkItemCreatorV2/kits.yml" as "kits"
+    delete {skitemcreator.kits::*}
+
+    loop yaml node keys "kits" from "kits":
+        set {_node::*} to "%loop-node%" split at "."
+        if {_node::2} is set:    
+
+            set {_kit} to {_node::2}
+            add {_kit} to {skitemcreator.kits::*}
+
+            #Cooldown
+            set {_value} to yaml value "kits.%{_kit}%.cooldown" from "kits"
+            if {_value} is set:
+                set {skitemcreator.kits::%{_kit}%::cooldown} to "%{_value}% seconds" parsed as timespan
+
+            #Permission
+            set {_value} to yaml value "kits.%{_kit}%.permission" from "kits"
+            if {_value} is set:
+                set {skitemcreator.kits::%{_kit}%::permission} to {_value}
+
+            #Message
+            set {_value} to yaml value "kits.%{_kit}%.message" from "kits"
+            if {_value} is set:
+                set {skitemcreator.kits::%{_kit}%::message} to formatted {_value}
+
+            #Cooldown Message
+            set {_value} to yaml value "kits.%{_kit}%.cooldown-message" from "kits"
+            if {_value} is set:
+                set {skitemcreator.kits::%{_kit}%::cooldown-message} to formatted {_value}
+
+            #Sound
+            set {_value} to yaml value "kits.%{_kit}%.sound.value" from "kits"
+            if {_value} is set:
+                set {skitemcreator.kits::%{_kit}%::sound::value} to {_value}
+                set {skitemcreator.kits::%{_kit}%::sound::volume} to yaml value "kits.%{_kit}%.sound.volume" from "kits"
+                set {skitemcreator.kits::%{_kit}%::sound::pitch} to yaml value "kits.%{_kit}%.sound.pitch" from "kits"
+
+            #Deny message
+            set {_value} to yaml value "kits.%{_kit}%.deny-message" from "kits"
+            if {_value} is set:
+                set {skitemcreator.kits::%{_kit}%::deny-message} to formatted {_value}
+
+            #Items
+            set {_value::*} to yaml list "kits.%{_kit}%.items" from "kits"
+            loop {_value::*}:
+                set {_item} to loop-value-2
+                set {_split::*} to {_item} split at " "
+                if {_split::2} is set:
+                    set {_quantity} to {_split::1} parsed as integer
+                    set {_item} to {_split::2}
+                else:
+                    set {_item} to {_split::1}
+                    set {_quantity} to 1
+                #If item is vanilla
+                set {_item-material} to Material.getMaterial({_item})
+                if {_item-material} is set:
+                    set {_i} to new ItemStack({_item-material})
+                    add {_quantity} of {_i} to {skitemcreator.kits::%{_kit}%::items::*}
+                #Else if it's skitemcreator
+                else:
+                    add {_quantity} of {skitemcreator.items.database::%{_item}%::final-item} to {skitemcreator.kits::%{_kit}%::items::*}
+
+            #Skript
+            set {_value::*} to yaml list "kits.%{_kit}%.skript" from "kits"
+            if {_value::*} is set:
+                set {skitemcreator.kits::%{_kit}%::skript::*} to {_value::*}
+
+    send "{@plugin-prefix} &e%size of {skitemcreator.kits::*}% &fkits loaded!" to console
+
+
+#
+#Returns the items inside a kit (only items. does not parse skript effects etc.)
+#
+function SKICReturnKitItems(kit: string) :: items:
+
+    return {skitemcreator.kits::%{_kit}%::items::*}
+
+#
+#Gives a kit to a player. Returns true if the kit was given successfully, or false.
+#
+function SKICGiveKitToPlayer(p: player, kit: string, bypass: boolean=false) :: boolean:
+
+    #Check permission
+    if {skitemcreator.kits::%{_kit}%::permission} is set:
+        {_bypass} is false
+        if {_p} does not have permission {skitemcreator.kits::%{_kit}%::permission}:
+            send {skitemcreator.kits::%{_kit}%::deny-message} to {_p}
+            play sound "entity.item.break" to {_p}
+            return false
+    #Check cooldown
+    if {skitemcreator.kits::%{_kit}%::cooldown} is set:
+        {_bypass} is false
+        set {_diff} to difference between {skitemcreator.player-kit-cooldowns::%uuid of {_p}%} and now
+        if {_diff} is less than {skitemcreator.kits::%{_kit}%::cooldown}:
+            set {_msg} to {skitemcreator.kits::%{_kit}%::cooldown-message}
+            set {_cd} to difference between {_diff} and {skitemcreator.kits::%{_kit}%::cooldown}
+            replace all "{cooldown}" with SKICFancyTimespan({_cd}) in {_msg}
+            send {_msg} to {_p}
+            play sound "entity.item.break" to {_p}
+            return false
+        set {skitemcreator.player-kit-cooldowns::%uuid of {_p}%} to now
+    #Give kit
+    give {skitemcreator.kits::%{_kit}%::items::*} to {_p}
+    #Message
+    if {skitemcreator.kits::%{_kit}%::message} is set:
+        send {skitemcreator.kits::%{_kit}%::message} to {_p}
+    #Sound
+    if {skitemcreator.kits::%{_kit}%::sound::value} is set:
+        play sound {skitemcreator.kits::%{_kit}%::sound::value} with volume {skitemcreator.kits::%{_kit}%::sound::volume} and pitch {skitemcreator.kits::%{_kit}%::sound::pitch} to {_p}
+    #Skript effects
+    if {skitemcreator.kits::%{_kit}%::skript::*} is set:
+        loop {skitemcreator.kits::%{_kit}%::skript::*}:
+            parse effect loop-value from {_p}
+    return true

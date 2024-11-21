@@ -118,6 +118,9 @@ function SKICLoadConfig(itemload: string="ALL"):
         #Load crafts
         SKICLoadCrafts()
 
+        #Load kits
+        SKICLoadKits()
+
         send "&d&l---------------------------------------" to console
 
 
@@ -767,6 +770,90 @@ function SKICLoadPropertiesOfItem(file: string):
                     set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::message} to formatted yaml value "conditions.%{_condition}%.message" from {_yaml}
                     set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::comparator} to yaml value "conditions.%{_condition}%.comparator" from {_yaml}
                     set {skitemcreator.items.database::%{_filename}%::conditions::%{_condition}%::value} to yaml value "conditions.%{_condition}%.value" from {_yaml}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Spawner
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        else if {_key} is "spawner":
+            set {_n} to empty nbt compound
+            set {_block-entity-data} to compound tag "block_entity_data" of {_n}
+            set string tag "id" of {_block-entity-data} to yaml value "spawner.id" from {_yaml}
+            #Entity
+            set {_spawn-data} to compound tag "SpawnData" of {_block-entity-data}
+            set {_entity-tag} to compound tag "entity" of {_spawn-data}
+            set string tag "id" of {_entity-tag} to yaml value "spawner.entity" from {_yaml}
+            #Other options
+            set short tag "Delay" of {_block-entity-data} to yaml value "spawner.delay" from {_yaml}
+            set short tag "MaxNearbyEntities" of {_block-entity-data} to yaml value "spawner.max-nearby-entities" from {_yaml}
+            set short tag "RequiredPlayerRange" of {_block-entity-data} to yaml value "spawner.required-player-range" from {_yaml}
+            set short tag "SpawnCount" of {_block-entity-data} to yaml value "spawner.spawn-count" from {_yaml}
+            set short tag "MinSpawnDelay" of {_block-entity-data} to yaml value "spawner.min-spawn-delay" from {_yaml}
+            set short tag "MaxSpawnDelay" of {_block-entity-data} to yaml value "spawner.max-spawn-delay" from {_yaml}
+            set short tag "SpawnRange" of {_block-entity-data} to yaml value "spawner.spawn-range" from {_yaml}
+
+            #
+            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Block state
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        else if {_key} is "block-state":
+            set {_n} to empty nbt compound
+            set {_block-state} to compound tag "block_state" of {_n}
+            set {_block-state-type} to yaml value "block-state.type" from {_yaml}
+            set {_block-state-value} to yaml value "block-state.value" from {_yaml} 
+            set string tag "%{_block-state-type}%" of {_block-state} to {_block-state-value}
+            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Can break (Only works with adventure gamemode)
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+        else if {_key} is "can-break":
+            set {_blocks::*} to yaml list "can-break.blocks" from {_yaml}
+            set {_n} to empty nbt compound
+            set {_can-break} to compound tag "can_break" of {_n}
+            set string list tag "blocks" of {_can-break} to {_blocks::*}
+            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Consumable
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+        else if {_key} is "consumable":
+            set {_n} to empty nbt compound
+            set {_consumable} to compound tag "consumable" of {_n}
+            set float tag "consume_seconds" of {_consumable} to yaml value "consumable.consume-seconds" of {_yaml}
+            set string tag "animation" of {_consumable} to yaml value "consumable.animation" of {_yaml}
+            set string tag "sound" of {_consumable} to yaml value "consumable.sound" of {_yaml}
+            set {_show-particles} to yaml value "consumable.has-particles" of {_yaml}
+            if {_show-particles} is true:
+                set {_show-particles} to 1
+            else:
+                set {_show-particles} to 0
+            set byte tag "has_consume_particles" of {_consumable} to {_show-particles}
+            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Damage resistant
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+        else if {_key} is "damage-resistant":
+            set {_n} to empty nbt compound
+            set {_resistances} to yaml value "damage-resistant" of {_yaml}
+            set {_damage-types} to compound tag "damage_resistant" of {_n}
+            set string tag "types" of {_damage-types} to {_resistances}
+            add nbt from {_n} to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #Glider
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+        else if {_key} is "glider":
+            add nbt from "{""minecraft:glider"":{}}" to nbt of {skitemcreator.items.database::%{_filename}%::final-item}
+
 
 
         #

@@ -1,0 +1,20 @@
+#
+#Returns a fancy timespan string
+#
+function SKICFancyTimespan(timespan: timespan) :: string:
+
+    {_timespan} is set
+    set {_time} to "%{_timespan}%"
+    set {_timespan::*} to {_time} parsed as "%number% %string%[s][ and %number% %string%[s]]"
+    set {_first} to "%{_timespan::1}%%first character of {_timespan::2}%"
+    set {_second} to "%{_timespan::3}%%first character of {_timespan::4}%"
+
+    #Format seconds
+    if {_first} contains ".":
+        set {_first::*} to {_first} split at "."
+        set {_first} to "%{_first::1}%s"
+    if {_second} contains ".":
+        set {_second::*} to {_second} split at "."
+        set {_second} to "%{_second::1}%s"
+
+    return ("%{_first}%%{_second}%" if {_timespan::3} is set, else "%{_first}%")

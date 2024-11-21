@@ -1,0 +1,31 @@
+kits:
+  example:
+    #[Optional] Cooldown in seconds.
+    cooldown: 120
+
+    #[Optional] Permission
+    permission: skic.kit.example
+
+    #[Optional] Message sent when the kit is given
+    message: "&aExample kit &eobtained!"
+
+    #[Optional] Sound played when the kit is given
+    sound:
+      value: entity.player.levelup
+      volume: 1
+      pitch: 1.5
+
+    #[Optional] Deny message sent when player doesn't have permission
+    deny-message: "&cYou can't get this kit!"
+
+    #[Optional] Cooldown message
+    cooldown-message: "&cYou must wait &e{cooldown} &cbefore obtaining this kit again."
+
+    #Items inside the kit. Can be vanilla or from SkItemCreator.
+    items:
+      - 32 IRON_INGOT
+      - 1 demon-sword
+
+    #{Optional] Skript code to execute when the kit is given
+    skript:
+      - broadcast "%player% is the best!"

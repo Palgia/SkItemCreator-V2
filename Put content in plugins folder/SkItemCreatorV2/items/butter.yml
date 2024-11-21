@@ -1,0 +1,26 @@
+item:
+  type: VANILLA
+  value: GOLD_INGOT
+
+name: "<#FFFC8B>&lButter"
+
+lore:
+  - "&fYou can consume it..."
+  - "&7&oOnly if you dare."
+
+consumable:
+  consumable-seconds: 2.5
+  #[OPTIONAL] Default to 'eat'
+  animation: brush
+  #[OPTIONAL] Default to 'entity.generic.eat'
+  sound: entity.pig.hurt
+  #[OPTIONAL] Default to true
+  has-particles: false
+
+skript:
+  1:
+    event: CONSUME
+    execute:
+      - apply slowness 2 to player for 10 seconds
+      - apply nausea 2 to player for 10 seconds
+      - send "&f&lWell... It tastes horrible..." to player
