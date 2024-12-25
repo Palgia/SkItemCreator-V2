@@ -123,13 +123,13 @@ on armor change:
             set helmet of player to air
             give {_helmet} to player
     set {_chestplate} to chestplate of player
-    if SKICInternalNameOfItem({_hchestplate}) is set:
+    if SKICInternalNameOfItem({_chestplate}) is set:
         if SKICCheckConditions(player, {_chestplate}) is false:
             set chestplate of player to air
             give {_chestplate} to player
     set {_leggings} to leggings of player
-    if SKICInternalNameOfItem({_leggingst}) is set:
-        if SKICCheckConditions(player, {_hleggings}) is false:
+    if SKICInternalNameOfItem({_leggings}) is set:
+        if SKICCheckConditions(player, {_leggings}) is false:
             set leggings of player to air
             give {_leggings} to player
     set {_boots} to boots of player
